@@ -1,61 +1,156 @@
+/* ==========================================
+   DESIGN SYSTEM - Variables
+   ========================================== */
+/* Couleurs Primaires */
+/* Couleurs Neutres */
+/* Menu color */
+/* Espacements */
+/* Border radius */
+/* Font */
+/* ==========================================
+   ROOT
+   ========================================== */
 .product-list-root {
-  font-family: "Segoe UI", sans-serif;
-  padding: 8px;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 24px;
   box-sizing: border-box;
+  background: #FFFFFF;
 }
 .empty-state {
-  font-size: 12px;
-  color: #6b7280;
+  font-size: 14px;
+  color: #8E8EA9;
+  text-align: center;
+  padding: 32px;
 }
+/* ==========================================
+   HEADER avec titre, icône et compteur
+   ========================================== */
+.product-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #DCDCE4;
+}
+.product-table-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.product-table-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.product-table-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.product-table-icon path {
+  fill: #32324D;
+}
+.product-table-title-text {
+  /* Header 3 du design system */
+  font-size: 16px;
+  font-weight: 500;
+  /* Semibold */
+  line-height: 20px;
+  color: #32324D;
+  margin: 0;
+}
+.product-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  background: #613BFF;
+  color: #FFFFFF;
+  border-radius: 12px;
+  /* Small text du design system */
+  font-size: 12px;
+  font-weight: 600;
+  /* Bold */
+  line-height: 1;
+}
+/* ==========================================
+   TABLEAU Container
+   ========================================== */
 .product-table-container {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  background: #FFFFFF;
+  border: 1px solid #DCDCE4;
+  border-radius: 4px;
+  overflow: hidden;
 }
-/* Header + rows : grille 9 colonnes */
-.product-header-row,
+/* ==========================================
+   HEADER du tableau
+   ========================================== */
+.product-header-row {
+  display: grid;
+  grid-template-columns: 40px 80px minmax(120px, 1.6fr) minmax(80px, 1fr) minmax(100px, 1.2fr) minmax(70px, 0.9fr) minmax(80px, 0.9fr) 70px 40px;
+  column-gap: 12px;
+  align-items: center;
+  padding: 12px 20px;
+  background: #062745;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.product-header-cell {
+  /* Table label du design system */
+  font-size: 11px;
+  font-weight: 600;
+  /* Bold */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+/* ==========================================
+   LIGNES du tableau
+   ========================================== */
 .product-row {
   display: grid;
   grid-template-columns: 40px 80px minmax(120px, 1.6fr) minmax(80px, 1fr) minmax(100px, 1.2fr) minmax(70px, 0.9fr) minmax(80px, 0.9fr) 70px 40px;
-  column-gap: 8px;
+  column-gap: 12px;
   align-items: center;
+  padding: 12px 20px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #DCDCE4;
+  cursor: pointer;
+  transition: background 0.16s ease;
 }
-.product-header-row {
-  padding: 4px 8px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f3f4f6;
-}
-.product-header-cell {
-  font-size: 11px;
-  font-weight: 600;
-  color: #4b5563;
-  white-space: nowrap;
-}
-/* rows */
-.product-row {
-  padding: 6px 8px;
-  border-radius: 6px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  margin-top: 4px;
-  transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+.product-row:last-child {
+  border-bottom: none;
 }
 .product-row:hover {
-  background: #f9fafb;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+  background: #F6F6F9;
 }
 .product-row.selected {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.25);
-  background: #eef2ff;
+  background: #F1F0FF;
+  border-left: 3px solid #613BFF;
+  padding-left: calc(20px - 3px);
 }
 .product-cell {
-  font-size: 11px;
-  color: #111827;
+  /* Body Regular du design system */
+  font-size: 14px;
+  font-weight: 400;
+  /* Regular */
+  line-height: 16px;
+  color: #32324D;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* ==========================================
+   COLONNES SPÉCIFIQUES
+   ========================================== */
 .col-image {
   display: flex;
   align-items: center;
@@ -64,60 +159,127 @@
 .product-image {
   width: 32px;
   height: 32px;
-  border-radius: 6px;
+  border-radius: 4px;
   object-fit: cover;
+  border: 1px solid #DCDCE4;
 }
 .product-image-placeholder {
   width: 32px;
   height: 32px;
-  border-radius: 999px;
-  background: #e5e7eb;
+  border-radius: 4px;
+  background: #EAEAEF;
+  border: 1px solid #DCDCE4;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  color: #4b5563;
+  color: #666687;
 }
 .col-libelle {
-  font-weight: 600;
+  /* Body Semibold du design system */
+  font-weight: 500;
+  /* Semibold */
+  color: #212134;
 }
 .col-pvc {
   text-align: right;
-  font-weight: 600;
+  /* Body Semibold du design system */
+  font-weight: 500;
+  color: #212134;
+  font-variant-numeric: tabular-nums;
 }
 .col-select {
   display: flex;
   align-items: center;
   justify-content: center;
 }
+/* ==========================================
+   CHECKBOXES
+   ========================================== */
 .product-select-checkbox,
 .product-select-all-checkbox {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #613BFF;
 }
-/* Pagination */
+.product-select-checkbox:hover,
+.product-select-all-checkbox:hover {
+  transform: scale(1.05);
+}
+/* ==========================================
+   PAGINATION
+   ========================================== */
 .product-pagination {
-  margin-top: 8px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #F6F6F9;
+  border-top: 1px solid #DCDCE4;
+}
+.product-pagination-info {
+  /* Small text du design system */
+  font-size: 12px;
+  font-weight: 400;
+  color: #666687;
+}
+.product-pagination-controls {
+  display: flex;
+  align-items: center;
   gap: 8px;
 }
 .product-page-button {
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
+  /* Button text du design system */
+  font-size: 14px;
+  font-weight: 600;
+  /* Bold */
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid #613BFF;
+  background: #FFFFFF;
+  color: #613BFF;
   cursor: pointer;
+  transition: all 0.16s ease;
+}
+.product-page-button:hover:not(:disabled) {
+  background: #613BFF;
+  color: #FFFFFF;
+}
+.product-page-button:active:not(:disabled) {
+  transform: translateY(1px);
 }
 .product-page-button:disabled {
-  opacity: 0.4;
-  cursor: default;
+  background: #F6F6F9;
+  border-color: #C0C0CF;
+  color: #C0C0CF;
+  cursor: not-allowed;
 }
 .product-page-info {
+  /* Small text du design system */
+  font-size: 12px;
+  font-weight: 400;
+  color: #666687;
+  padding: 0 10px;
+}
+/* ==========================================
+   DEBUG BOX (optionnel)
+   ========================================== */
+.product-debug-box {
+  margin-top: 16px;
+  padding: 12px;
+  background: #EBFAF1;
+  /* Success 100 */
+  border: 1px solid #5DB086;
+  /* Success 500 */
+  border-radius: 4px;
   font-size: 11px;
-  color: #4b5563;
+  font-family: 'Courier New', monospace;
+  color: #212134;
+  line-height: 1.6;
+}
+.product-debug-box b {
+  font-weight: 600;
 }
 

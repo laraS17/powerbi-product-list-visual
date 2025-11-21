@@ -1,0 +1,376 @@
+Background_Liste_Briefs = 
+-- Variables titres
+VAR TitrePlan = SELECTEDVALUE('Plan'[title], "Plan")
+VAR OperationTitre = SELECTEDVALUE('Cadrage'[operation_title])
+VAR RayonTitre = SELECTEDVALUE('Catégories'[Rayon num])
+VAR SousRayonTitre = SELECTEDVALUE('Catégories'[Sous rayon Num])
+
+VAR TitreComplet =
+    VAR HasOperation = NOT ISBLANK(OperationTitre)
+    VAR HasRayon = NOT ISBLANK(RayonTitre)
+    VAR HasSousRayon = NOT ISBLANK(SousRayonTitre)
+    RETURN
+        IF(
+            HasOperation || HasRayon || HasSousRayon,
+            "Mes offres & briefs | " &
+            IF(HasOperation, OperationTitre & IF(HasRayon || HasSousRayon, " • ", ""), "") &
+            IF(HasRayon, RayonTitre & IF(HasSousRayon, " • ", ""), "") &
+            IF(HasSousRayon, SousRayonTitre, ""),
+            "Mes offres & briefs"
+        )
+
+-- Calcul des totaux pour le footer avec les mesures spécifiées
+VAR TotalOffres = [UB_Prévis]
+VAR ObjectifOffres = [UB_Objectifs]
+VAR TotalCA_Prev = [CA Prévis]
+VAR MoyenneCA_Offre = [CA par Offre prev]
+VAR ObjectifCA_Prev = [CA_Objectifs]
+VAR ObjectifMoyenneOffre = [CA par Offre objectif]
+
+-- Calcul des pourcentages d'atteinte
+VAR PourcentageOffres = DIVIDE(TotalOffres, ObjectifOffres, 0) * 100
+VAR PourcentageCA = DIVIDE(TotalCA_Prev, ObjectifCA_Prev, 0) * 100
+VAR PourcentageMoyenne = DIVIDE(MoyenneCA_Offre, ObjectifMoyenneOffre, 0) * 100
+
+-- Construction de la matrice HTML
+VAR MatriceHTML =
+    CONCATENATEX(
+        SUMMARIZE(
+            'Offre_vue diapo',
+            'Offre_vue diapo'[Brief.brief_id],
+            'Offre_vue diapo'[Brief.brief_title]
+        ),
+        VAR CurrentBriefID = 'Offre_vue diapo'[Brief.brief_id]
+        VAR CurrentBriefTitle = 'Offre_vue diapo'[Brief.brief_title]
+        VAR BriefIndex = "brief_" & CurrentBriefID
+        
+        VAR BriefNbUB =
+            CALCULATE(
+                [Nb UB],
+                'Offre_vue diapo'[Brief.brief_id] = CurrentBriefID
+            )
+        VAR BriefCA_Prev =
+            CALCULATE(
+                SUM('Offre_vue diapo'[CA_Prév]),
+                'Offre_vue diapo'[Brief.brief_id] = CurrentBriefID
+            )
+        VAR BriefCA_Offre =
+            CALCULATE(
+                [CA par Offre prev],
+                'Offre_vue diapo'[Brief.brief_id] = CurrentBriefID
+            )
+        
+        VAR OffresHTML =
+            CONCATENATEX(
+                FILTER(
+                    'Offre_vue diapo',
+                    'Offre_vue diapo'[Brief.brief_id] = CurrentBriefID
+                ),
+                VAR OffreTitle = 'Offre_vue diapo'[titre_de_loffre]
+                VAR OffreCA_Prev = 'Offre_vue diapo'[CA_Prév]
+                VAR OffreCA_Offre = [CA par Offre prev]
+                RETURN
+                "<tr class='offre-row " & BriefIndex & "' style='display:none'>
+                    <td style='padding:12px 20px 12px 56px;border-bottom:1px solid #E5E7EB;font-size:13px;color:#4B5563;font-weight:400'>" & OffreTitle & "</td>
+                    <td style='padding:12px 20px;border-bottom:1px solid #E5E7EB;text-align:right;font-size:13px;color:#1F2937;font-weight:500'></td>
+                    <td style='padding:12px 20px;border-bottom:1px solid #E5E7EB;text-align:right;font-size:13px;color:#1F2937;font-weight:500'>" & FORMAT(OffreCA_Prev, "#,##0 €") & "</td>
+                    <td style='padding:12px 20px;border-bottom:1px solid #E5E7EB;text-align:right;font-size:13px;color:#1F2937;font-weight:500'>" & FORMAT(OffreCA_Offre, "#,##0 €") & "</td>
+                </tr>",
+                "",
+                'Offre_vue diapo'[titre_de_loffre],
+                ASC
+            )
+        
+        RETURN
+        "<tr class='brief-row' onclick='toggleBrief(""" & BriefIndex & """)' style='background-color:#F9FAFB;cursor:pointer'>
+            <td style='padding:14px 20px;border-bottom:2px solid #E5E7EB;font-size:14px;color:#111827;font-weight:600'>
+                <div style='display:flex;align-items:center;gap:12px'>
+                    <svg class='chevron " & BriefIndex & "-chevron' width='16' height='16' viewBox='0 0 24 24' fill='none' style='flex-shrink:0'>
+                        <path d='M9 18l6-6-6-6' stroke='#613BFF' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/>
+                    </svg>
+                    <span>" & CurrentBriefTitle & "</span>
+                </div>
+            </td>
+            <td style='padding:14px 20px;border-bottom:2px solid #E5E7EB;text-align:right;font-size:14px;color:#111827;font-weight:600'>" & FORMAT(BriefNbUB, "#,##0") & "</td>
+            <td style='padding:14px 20px;border-bottom:2px solid #E5E7EB;text-align:right;font-size:14px;color:#111827;font-weight:600'>" & FORMAT(BriefCA_Prev, "#,##0 €") & "</td>
+            <td style='padding:14px 20px;border-bottom:2px solid #E5E7EB;text-align:right;font-size:14px;color:#111827;font-weight:600'>" & FORMAT(BriefCA_Offre, "#,##0 €") & "</td>
+        </tr>" &
+        OffresHTML,
+        "",
+        'Offre_vue diapo'[Brief.brief_id],
+        ASC
+    )
+
+-- Construction du footer avec totaux
+VAR FooterHTML =
+    "<tr style='background-color:#F0F4FF;border-top:3px solid #613BFF'>
+        <td style='padding:16px 20px;font-size:14px;color:#111827;font-weight:700'>
+            <div style='display:flex;align-items:center;gap:8px'>
+                <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#613BFF' stroke-width='2'>
+                    <path d='M9 11l3 3L22 4'/>
+                    <path d='M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11'/>
+                </svg>
+                <span>TOTAL</span>
+            </div>
+        </td>
+        <td style='padding:16px 20px;text-align:right'>
+            <div style='display:flex;flex-direction:column;align-items:flex-end;gap:4px'>
+                <span style='font-size:15px;color:#111827;font-weight:700'>" & FORMAT(TotalOffres, "#,##0") & "</span>
+                <div style='display:flex;align-items:center;gap:6px'>
+                    <span style='font-size:11px;color:#6B7280;font-weight:500'>Obj: " & FORMAT(ObjectifOffres, "#,##0") & "</span>
+                    <span style='font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600;" & 
+                    IF(PourcentageOffres >= 100, "background-color:#D1FAE5;color:#065F46", 
+                       IF(PourcentageOffres >= 80, "background-color:#FEF3C7;color:#92400E", 
+                          "background-color:#FEE2E2;color:#991B1B")) & "'>" & 
+                    FORMAT(PourcentageOffres, "0") & "%</span>
+                </div>
+            </div>
+        </td>
+        <td style='padding:16px 20px;text-align:right'>
+            <div style='display:flex;flex-direction:column;align-items:flex-end;gap:4px'>
+                <span style='font-size:15px;color:#111827;font-weight:700'>" & FORMAT(TotalCA_Prev, "#,##0 €") & "</span>
+                <div style='display:flex;align-items:center;gap:6px'>
+                    <span style='font-size:11px;color:#6B7280;font-weight:500'>Obj: " & FORMAT(ObjectifCA_Prev, "#,##0 €") & "</span>
+                    <span style='font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600;" & 
+                    IF(PourcentageCA >= 100, "background-color:#D1FAE5;color:#065F46", 
+                       IF(PourcentageCA >= 80, "background-color:#FEF3C7;color:#92400E", 
+                          "background-color:#FEE2E2;color:#991B1B")) & "'>" & 
+                    FORMAT(PourcentageCA, "0") & "%</span>
+                </div>
+            </div>
+        </td>
+        <td style='padding:16px 20px;text-align:right'>
+            <div style='display:flex;flex-direction:column;align-items:flex-end;gap:4px'>
+                <span style='font-size:15px;color:#111827;font-weight:700'>" & FORMAT(MoyenneCA_Offre, "#,##0 €") & "</span>
+                <div style='display:flex;align-items:center;gap:6px'>
+                    <span style='font-size:11px;color:#6B7280;font-weight:500'>Obj: " & FORMAT(ObjectifMoyenneOffre, "#,##0 €") & "</span>
+                    <span style='font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600;" & 
+                    IF(PourcentageMoyenne >= 100, "background-color:#D1FAE5;color:#065F46", 
+                       IF(PourcentageMoyenne >= 80, "background-color:#FEF3C7;color:#92400E", 
+                          "background-color:#FEE2E2;color:#991B1B")) & "'>" & 
+                    FORMAT(PourcentageMoyenne, "0") & "%</span>
+                </div>
+            </div>
+        </td>
+    </tr>"
+
+RETURN
+"<style>
+* {box-sizing:border-box}
+body {font-family:Segoe UI,system-ui,-apple-system,sans-serif;margin:0;padding:0}
+
+/* Bouton primaire = diapo */
+/* Bouton primaire = DIAPORAMA (Lancer) */
+.diapo-btn {
+    background-color:#8775FF;       /* fond plein violet */
+    border:1px solid #8775FF;
+    border-radius:4px;
+    padding:11px 24px;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    color:#FFFFFF;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:all 180ms ease;
+    position:relative;
+    overflow:hidden;
+}
+
+.diapo-btn::before {
+    content:'';
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    /* pas d’effet particulier, juste pour garder la structure si besoin */
+}
+
+.diapo-btn:hover {
+    /* même violet que la maquette, juste un léger shadow */
+    background-color:#613BFF;
+    border-color:#613BFF;
+    box-shadow:0 4px 10px rgba(97,59,255,.35);
+}
+
+.diapo-btn:active {
+    transform:scale(0.98);
+    box-shadow:0 2px 4px rgba(97,59,255,.25);
+}
+
+.expand-btn {
+    background-color:#FFFFFF;
+    border:1px solid #613BFF;
+    border-radius:4px;
+    padding:8px 16px;
+    font-weight:500;
+    font-size:13px;
+    cursor:pointer;
+    color:#613BFF;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition:all 160ms ease;
+}
+
+.expand-btn:hover {
+    /* état hover = rect violet clair + bord violet (#DBD7FF + #613BFF) */
+    background-color:#DBD7FF;
+    border-color:#613BFF;
+    color:#613BFF;
+}
+
+.expand-btn:disabled {
+    background-color:#F6F6F9;
+    border-color:#C0C0CF;
+    color:#C0C0CF;
+    cursor:not-allowed;
+}
+
+.expand-btn svg {
+    transition:transform 160ms ease;
+}
+
+
+.diapo-icon {
+    width:18px;
+    height:18px;
+    flex-shrink:0;
+}
+
+.brief-row {background-color:#F9FAFB}
+.brief-row:hover {background-color:#F3F4F6}
+.offre-row:hover {background-color:#FAFBFC}
+
+.matrix-table {border-collapse:collapse;width:100%;table-layout:fixed}
+.matrix-header {
+    background-color:#062745;
+    color:#FFFFFF;
+    font-weight:600;
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+
+.table-container {max-height:550px;overflow-y:auto;overflow-x:auto;border:1px solid #E5E7EB}
+.table-container::-webkit-scrollbar {width:8px}
+.table-container::-webkit-scrollbar-track {background:#F3F4F6}
+.table-container::-webkit-scrollbar-thumb {background:#D1D5DB}
+.table-container::-webkit-scrollbar-thumb:hover {background:#9CA3AF}
+
+.table-footer {
+    position:sticky;
+    bottom:0;
+    background-color:#F0F4FF;
+    z-index:9;
+    box-shadow:0 -2px 8px rgba(0,0,0,.05);
+}
+</style>
+
+<script>
+var allExpanded = false;
+function toggleBrief(briefId) {
+    var rows = document.querySelectorAll('.offre-row.' + briefId);
+    var chevron = document.querySelector('.' + briefId + '-chevron');
+    var isVisible = rows[0] && rows[0].style.display === 'table-row';
+    rows.forEach(function(row) {
+        row.style.display = isVisible ? 'none' : 'table-row';
+    });
+    if(chevron) {
+        chevron.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(90deg)';
+    }
+}
+function toggleAllBriefs() {
+    var allOffreRows = document.querySelectorAll('.offre-row');
+    var allChevrons = document.querySelectorAll('.chevron');
+    var expandBtn = document.querySelector('.expand-btn');
+    var expandIcon = expandBtn.querySelector('svg');
+    var expandText = expandBtn.querySelector('span');
+    allExpanded = !allExpanded;
+    allOffreRows.forEach(function(row) {
+        row.style.display = allExpanded ? 'table-row' : 'none';
+    });
+    allChevrons.forEach(function(chevron) {
+        chevron.style.transform = allExpanded ? 'rotate(90deg)' : 'rotate(0deg)';
+    });
+    expandText.textContent = allExpanded ? 'Tout fermer' : 'Tout ouvrir';
+    expandIcon.style.transform = allExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+</script>
+
+<div style='width:100%;background:#ffffff;padding:24px;box-sizing:border-box;font-family:Segoe UI,system-ui,-apple-system,sans-serif;min-height:100vh'>
+
+    <div style='background-color:#FFFFFF;border-radius:4px;padding:20px 24px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;border:1px solid #E5E7EB'>
+        <div style='display:flex;align-items:center;gap:14px'>
+            <div style='width:40px;height:40px;background-color:#F3F4F6;border-radius:4px;display:flex;align-items:center;justify-content:center'>
+                <svg viewBox='0 0 24 24' fill='none' width='22' height='22' xmlns='http://www.w3.org/2000/svg'>
+                    <path d='M8 21H16' stroke='#613BFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+                    <path d='M12 17V21' stroke='#613BFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+                    <rect x='2' y='3' width='20' height='14' rx='3' stroke='#613BFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+                </svg>
+            </div>
+            <div>
+                <div style='font-size:15px;font-weight:600;color:#111827;margin-bottom:2px'>Diaporama</div>
+                <div style='font-size:12px;color:#6B7280;font-weight:400'>Présentation visuelle de vos offres</div>
+            </div>
+        </div>
+        <button class='diapo-btn'>
+            <svg class='diapo-icon' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                <path d='M5 4.98963C5 4.01846 5 3.53288 5.20249 3.26521C5.37889 3.03202 5.64852 2.88772 5.9404 2.87029C6.27544 2.85029 6.67946 3.11964 7.48752 3.65835L18.0031 10.6687C18.6708 11.1138 19.0046 11.3364 19.1209 11.6169C19.2227 11.8622 19.2227 12.1378 19.1209 12.3831C19.0046 12.6636 18.6708 12.8862 18.0031 13.3313L7.48752 20.3417C6.67946 20.8804 6.27544 21.1497 5.9404 21.1297C5.64852 21.1123 5.37889 20.968 5.20249 20.7348C5 20.4671 5 19.9815 5 19.0104V4.98963Z'
+                      stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>
+            </svg>
+            <span style='letter-spacing:0.3px'>Lancer</span>
+        </button>
+    </div>
+
+    <div style='background:#ffffff;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden;border:1px solid #E5E7EB'>
+        <div style='background-color:#F9FAFB;padding:16px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between'>
+            <div style='display:flex;align-items:center;gap:12px'>
+                <div style='width:32px;height:32px;background-color:#613BFF;border-radius:4px;display:flex;align-items:center;justify-content:center'>
+                    <svg width='22' height='22' viewBox='0 0 22 22' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                        <g clip-path='url(#clip0_16498_1296)'>
+                            <path d='M19.25 3.95312C19.25 3.77079 19.1776 3.59592 19.0486 3.46699C18.9197 3.33806 18.7448 3.26562 18.5625 3.26562C18.3802 3.26562 18.2053 3.33806 18.0764 3.46699C17.9474 3.59592 17.875 3.77079 17.875 3.95312V4.48456L5.39413 8.51469C5.32497 8.53708 5.26469 8.58081 5.22195 8.63961C5.17921 8.69841 5.15621 8.76925 5.15625 8.84194V12.9374C5.15625 13.0105 5.17958 13.0818 5.22285 13.1408C5.26613 13.1997 5.32709 13.2434 5.39687 13.2653L6.29063 13.5458C6.36054 13.5676 6.42165 13.6112 6.46506 13.6702C6.50846 13.7292 6.5319 13.8005 6.53194 13.8738V15.6551C6.53575 16.473 6.86329 17.2561 7.44292 17.8331C8.02255 18.4102 8.8071 18.7342 9.625 18.7344H9.63944C10.4594 18.7306 11.2442 18.4014 11.8216 17.8193C12.399 17.2371 12.7217 16.4495 12.7188 15.6296V15.5609L17.875 17.1765V17.7031C17.875 17.8855 17.9474 18.0603 18.0764 18.1893C18.2053 18.3182 18.3802 18.3906 18.5625 18.3906C18.7448 18.3906 18.9197 18.3182 19.0486 18.1893C19.1776 18.0603 19.25 17.8855 19.25 17.7031V3.95312ZM11.3438 15.6331C11.3458 16.0888 11.1667 16.5267 10.8459 16.8504C10.5252 17.1741 10.089 17.3572 9.63325 17.3594H9.625C9.17118 17.3594 8.73577 17.1799 8.41377 16.8601C8.09178 16.5403 7.90934 16.1061 7.90625 15.6523V14.52C7.90628 14.4661 7.91898 14.413 7.94333 14.3649C7.96768 14.3168 8.003 14.2751 8.04642 14.2432C8.08985 14.2113 8.14017 14.19 8.19333 14.1811C8.24649 14.1723 8.30099 14.176 8.35244 14.1921L11.1024 15.0542C11.1723 15.076 11.2335 15.1196 11.2769 15.1786C11.3203 15.2376 11.3437 15.3089 11.3438 15.3821V15.6331Z'
+                                  fill='white'/>
+                            <path d='M4.125 8.42188C4.125 8.23954 4.05257 8.06467 3.92364 7.93574C3.7947 7.80681 3.61984 7.73438 3.4375 7.73438C3.25516 7.73438 3.0803 7.80681 2.95136 7.93574C2.82243 8.06467 2.75 8.23954 2.75 8.42188L2.75344 13.2344C2.75344 13.4167 2.82587 13.5916 2.9548 13.7205C3.08373 13.8494 3.2586 13.9219 3.44094 13.9219H3.4375C3.61701 13.9219 3.78943 13.8518 3.91789 13.7264C4.04636 13.601 4.12069 13.4303 4.125 13.2509V8.42188Z'
+                                  fill='white'/>
+                        </g>
+                        <defs>
+                            <clipPath id='clip0_16498_1296'>
+                                <rect width='16.5' height='16.5' fill='white' transform='translate(2.75 2.75)'/>
+                            </clipPath>
+                        </defs>
+                    </svg>
+                </div>
+                <span style='font-size:15px;font-weight:600;color:#1A202C'>" & TitreComplet & "</span>
+            </div>
+            <button class='expand-btn' onclick='toggleAllBriefs()'>
+                <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+                    <polyline points='6 9 12 15 18 9'></polyline>
+                </svg>
+                <span>Tout ouvrir</span>
+            </button>
+        </div>
+
+        <div class='table-container'>
+            <table class='matrix-table'>
+                <thead>
+                    <tr class='matrix-header'>
+                        <th style='padding:14px 20px;text-align:left;font-size:12px;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.2);width:40%'>Brief / Offre</th>
+                        <th style='padding:14px 20px;text-align:right;font-size:12px;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.2);width:20%'>Nb UB</th>
+                        <th style='padding:14px 20px;text-align:right;font-size:12px;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.2);width:20%'>CA Prév</th>
+                        <th style='padding:14px 20px;text-align:right;font-size:12px;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.2);width:20%'>CA par Offre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    " & MatriceHTML & "
+                </tbody>
+                <tfoot class='table-footer'>
+                    " & FooterHTML & "
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+</div>"

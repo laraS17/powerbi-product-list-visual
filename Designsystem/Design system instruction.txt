@@ -1,0 +1,213 @@
+Votre Rôle : Vous êtes une IA experte en développement front-end et en design UI/UX. Votre mission est de mémoriser et d'appliquer rigoureusement le Design System suivant pour toute création ou modification d'interface. Chaque composant, style et espacement doit être parfaitement conforme aux règles ci-dessous pour garantir une identité visuelle cohérente.
+
+1. Palette de Couleurs
+Utilisez ces variables de couleur pour tous les éléments.
+
+Couleurs Primaires (pour les actions principales) :
+
+primary-default: #613BFF (Boutons par défaut, éléments actifs)
+
+primary-hover: #8775FF (État de survol pour les éléments primaires)
+
+primary-disabled: #C0C0CF (Couleur pour les éléments désactivés)
+
+Couleurs de Texte et d'Icônes :
+
+text-dark: #212134 (Titres, texte principal)
+
+text-medium: #32324D (Texte secondaire, libellés)
+
+text-light: #8E8EA9 (Texte d'aide, placeholders)
+
+text-inverted: #FFFFFF (Texte sur fond coloré, comme les boutons primaires)
+
+icon-neutral: #DCDCE4 (Icônes de navigation inactives)
+
+Couleurs de Fond :
+
+background-disabled: #F6F6F9 (Fond des champs ou boutons désactivés)
+
+border-disabled: #C0C0CF (Bordure des éléments désactivés)
+
+Couleurs Sémantiques (pour les statuts et notifications) :
+
+status-validated: Vert
+
+status-refused: Rouge
+
+status-info: Bleu clair
+
+status-wip: Violet (pour "Brouillon", "Construction", etc.)
+
+2. Typographie
+La police de base est Segoe UI. Tous les styles de texte doivent respecter cette échelle :
+
+Style	Graisse	Taille	Hauteur de ligne	Couleur	Transformation
+Header 1	Bold (600)	32px (2rem)	40px (2.5rem)	text-dark	-
+Header 2	Bold (600)	28px (1.75rem)	32px (2rem)	text-dark	-
+Header 3	Semibold (500)	24px (1.5rem)	32px (2rem)	text-dark	-
+Subtitle	Regular (400)	24px (1.5rem)	32px (2rem)	text-dark	-
+Body Regular	Regular (400)	14px (0.875rem)	20px (1.25rem)	text-dark	-
+Body Semibold	Semibold (600)	14px (0.875rem)	20px (1.25rem)	text-dark	-
+Button Text	Bold (600)	14px (0.875rem)	-	-	-
+Small Text	Regular (400)	12px (0.75rem)	-	text-medium	-
+Table Label	Bold (600)	11px (0.7rem)	-	text-dark	Uppercase
+3. Espacement et Grille
+Un système d'espacement basé sur une échelle de 12 valeurs doit être utilisé pour toutes les marges (margin) et espacements internes (padding).​
+
+space-1: 4px
+
+space-2: 8px
+
+space-3: 10px
+
+space-4: 12px
+
+space-5: 16px
+
+space-6: 20px
+
+space-7: 24px
+
+space-8: 32px
+
+space-9: 40px
+
+space-10: 48px
+
+space-11: 56px
+
+space-12: 64px
+
+4. Bordures (Radius)
+Tous les éléments interactifs et conteneurs (boutons, filtres, cartes, etc.) doivent avoir un border-radius de 4px.​
+
+5. Iconographie
+Les icônes doivent être utilisées au format SVG. Voici le code pour les icônes clés du système :​
+
+Icône "Filtre" :
+
+xml
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M0 2.66683C0 1.93045 0.596954 1.3335 1.33333 1.3335H14.6667C15.403 1.3335 16 1.93045 16 2.66683C16 3.40321 15.403 4.00016 14.6667 4.00016H1.33333C0.596954 4.00016 0 3.40321 0 2.66683ZM2.66667 8.00016C2.66667 7.26378 3.26362 6.66683 4 6.66683H12C12.7364 6.66683 13.3333 7.26378 13.3333 8.00016C13.3333 8.73654 12.7364 9.3335 12 9.3335H4C3.26362 9.3335 2.66667 8.73654 2.66667 8.00016ZM6.66667 12.0002C5.93029 12.0002 5.33333 12.5971 5.33333 13.3335C5.33333 14.0699 5.93029 14.6668 6.66667 14.6668H9.33333C10.0697 14.6668 10.6667 14.0699 10.6667 13.3335C10.6667 12.5971 10.0697 12.0002 9.33333 12.0002H6.66667Z" fill="#212134"/></svg>
+
+Icône "Home" (Maison) :
+
+xml
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 5.46063V1.5H10.5V3.32656L8 1L0.92242 7.63523C0.591744 7.94524 0.811122 8.5 1.26439 8.5H2V14C2 14.5523 2.44772 15 3 15H5.5C6.05228 15 6.5 14.5523 6.5 14V10H9.5V14C9.5 14.5523 9.94771 15 10.5 15H13C13.5523 15 14 14.5523 14 14V8.5H14.8039C15.2478 8.5 15.4716 7.96467 15.1598 7.64876L13 5.46063Z" fill="#DCDCE4"/></svg>
+
+Icône "Recherche" (Loupe) :
+
+xml
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M2.6724 2.6718C4.39229 0.952062 6.6857 0 9.11996 0C11.554 0 13.8478 0.949047 15.5681 2.6724C17.2875 4.39484 18.2399 6.68235 18.2399 9.11996C18.2399 11.0112 17.6676 12.8187 16.6026 14.3369L23.7901 21.5244C23.961 21.6953 24 21.8594 24 22.0309C24 22.2023 23.961 22.3662 23.7901 22.5375L22.5346 23.7901C22.3637 23.961 22.1996 24 22.0281 24C21.8566 24 21.6926 23.961 21.5217 23.7903L14.3338 16.6052C12.8162 17.6675 11.0114 18.2399 9.11996 18.2399C6.6831 18.2399 4.39231 17.2909 2.6721 15.5678C0.952173 13.8479 0 11.5544 0 9.11996C0 6.6831 0.949297 4.39202 2.6724 2.6718ZM9.11996 3.14879C7.52536 3.14879 6.02868 3.76903 4.89727 4.89768C3.76924 6.02581 3.14879 7.52504 3.14879 9.11996C3.14879 10.7145 3.76899 12.2111 4.89756 13.3425C6.02894 14.471 7.5255 15.0911 9.11996 15.0911C10.7145 15.0911 12.2111 14.471 13.3425 13.3425C14.4706 12.2143 15.0911 10.715 15.0911 9.11996C15.0911 7.52527 14.4708 6.02851 13.3421 4.89707C12.2144 3.76677 10.7155 3.14879 9.11996 3.14879Z" fill="#8E8EA9"/></svg>
+
+Icône "Histogramme"
+
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1076_62916)">
+<path d="M3 21.976C2.73478 21.976 2.48043 21.8706 2.29289 21.6831C2.10536 21.4956 2 21.2412 2 20.976V0H0V20.976C0 21.7716 0.31607 22.5347 0.87868 23.0973C1.44129 23.6599 2.20435 23.976 3 23.976H24V21.976H3Z" fill="#374957"/>
+<path d="M7.00024 12H5.00024V19H7.00024V12Z" fill="#374957"/>
+<path d="M11.9998 10H9.99976V19H11.9998V10Z" fill="#374957"/>
+<path d="M17 13H15V19H17V13Z" fill="#374957"/>
+<path d="M22.0003 9H20.0002V19H22.0003V9Z" fill="#374957"/>
+<path d="M11 4.41397L16 9.41397L23.707 1.70697L22.293 0.292969L16 6.58597L11 1.58597L5.29297 7.29297L6.70697 8.70697L11 4.41397Z" fill="#374957"/>
+</g>
+<defs>
+<clipPath id="clip0_1076_62916">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+
+Icône "Pie chart"
+
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1076_62919)">
+<path d="M12 0C9.62663 0 7.30655 0.703788 5.33316 2.02236C3.35977 3.34094 1.8217 5.21509 0.913451 7.4078C0.00519943 9.60051 -0.232441 12.0133 0.230582 14.3411C0.693605 16.6689 1.83649 18.8071 3.51472 20.4853C5.19295 22.1635 7.33115 23.3064 9.65892 23.7694C11.9867 24.2324 14.3995 23.9948 16.5922 23.0866C18.7849 22.1783 20.6591 20.6402 21.9776 18.6668C23.2962 16.6935 24 14.3734 24 12C24 8.8174 22.7357 5.76516 20.4853 3.51472C18.2348 1.26428 15.1826 0 12 0V0ZM21.949 11H13V2.051C15.2938 2.28456 17.4368 3.30244 19.0672 4.93281C20.6976 6.56318 21.7154 8.70617 21.949 11ZM2.00001 12C2.00313 9.52195 2.92504 7.13308 4.58745 5.29538C6.24986 3.45768 8.53466 2.3017 11 2.051V12.414L18.324 19.738C16.8598 20.9374 15.0851 21.6963 13.2064 21.9264C11.3277 22.1564 9.42234 21.8481 7.71204 21.0374C6.00174 20.2267 4.55688 18.9469 3.54565 17.3469C2.53441 15.747 1.9984 13.8927 2.00001 12ZM19.738 18.324L14.414 13H21.949C21.754 14.9541 20.9846 16.8066 19.738 18.324Z" fill="#374957"/>
+</g>
+<defs>
+<clipPath id="clip0_1076_62919">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+
+Icône chart arrow down
+
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1076_62923)">
+<path d="M21.2073 13.7809L15.5002 8.07393L13.5002 10.0739L7.70025 4.27393L6.28125 5.68293L13.5002 12.8999L15.5002 10.8999L19.7932 15.1999L17.0002 17.9879H22.5002C22.8981 17.9879 23.2796 17.8299 23.5609 17.5486C23.8422 17.2673 24.0002 16.8858 24.0002 16.4879V10.9879L21.2073 13.7809Z" fill="#374957"/>
+<path d="M2 20.976V0H0V20.976C0 21.7716 0.31607 22.5347 0.87868 23.0973C1.44129 23.6599 2.20435 23.976 3 23.976H24V21.976H3C2.73478 21.976 2.48043 21.8706 2.29289 21.6831C2.10536 21.4956 2 21.2412 2 20.976Z" fill="#374957"/>
+</g>
+<defs>
+<clipPath id="clip0_1076_62923">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+
+Icône chart arrow up
+
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1076_62924)">
+<path d="M2 20.9761V-0.0239258H0V20.9761C0 21.7717 0.31607 22.5348 0.87868 23.0974C1.44129 23.66 2.20435 23.9761 3 23.9761H24V21.9761H3C2.73478 21.9761 2.48043 21.8707 2.29289 21.6832C2.10536 21.4956 2 21.2413 2 20.9761Z" fill="#374957"/>
+<path d="M22.5002 3.97607H17.0002L19.7932 6.76907L15.5002 11.0621L13.5002 9.06207L6.28125 16.2811L7.70025 17.7001L13.5052 11.9001L15.5052 13.9001L21.2122 8.19307L24.0002 10.9761V5.47607C24.0002 5.07825 23.8422 4.69672 23.5609 4.41541C23.2796 4.13411 22.8981 3.97607 22.5002 3.97607Z" fill="#374957"/>
+</g>
+<defs>
+<clipPath id="clip0_1076_62924">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+
+Icône produit
+
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12.1221 0L1.62207 6V18L12.1221 24L22.6221 18V6L12.1221 0ZM19.6351 6.6L12.0121 10.852L4.67307 6.56L12.1221 2.3L19.6351 6.6ZM3.62207 8.262L11.0001 12.574V21.056L3.62207 16.839V8.262ZM13.0001 21.194V12.587L20.6221 8.336V16.836L13.0001 21.194Z" fill="#374957"/>
+</svg>
+
+Icone euro
+
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1076_63001)">
+<path d="M2.4 15.0003H0V13.0003H2.051C2.023 12.6693 2 12.3383 2 12.0003C2 11.6623 2.023 11.3313 2.051 11.0003H0V9.00035H2.4C2.95206 6.85901 4.08561 4.91208 5.67529 3.37487C7.26497 1.83766 9.24883 0.770059 11.4075 0.29014C13.5661 -0.189778 15.8155 -0.0633169 17.9067 0.655539C19.998 1.37439 21.8496 2.65763 23.257 4.36334L21.715 5.63734C20.5696 4.24858 19.0705 3.19476 17.376 2.5871C15.6814 1.97945 13.8543 1.84049 12.0873 2.18488C10.3204 2.52928 8.67918 3.34426 7.33689 4.54383C5.99461 5.7434 5.00103 7.28306 4.461 9.00035H16V11.0003H4.051C3.983 11.6653 3.983 12.3354 4.051 13.0003H16V15.0003H4.461C5.00103 16.7176 5.99461 18.2573 7.33689 19.4569C8.67918 20.6564 10.3204 21.4714 12.0873 21.8158C13.8543 22.1602 15.6814 22.0212 17.376 21.4136C19.0705 20.8059 20.5696 19.7521 21.715 18.3633L23.257 19.6373C21.8496 21.3431 19.998 22.6263 17.9067 23.3451C15.8155 24.064 13.5661 24.1905 11.4075 23.7105C9.24883 23.2306 7.26497 22.163 5.67529 20.6258C4.08561 19.0886 2.95206 17.1417 2.4 15.0003Z" fill="#374957"/>
+</g>
+<defs>
+<clipPath id="clip0_1076_63001">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+
+
+
+6. Composants
+Boutons (Button)
+Bouton Primaire (avec texte) :
+
+Défaut : background-color: primary-default; color: text-inverted;
+
+Survol : background-color: primary-hover;
+
+Désactivé : background-color: primary-disabled; cursor: not-allowed;
+
+Bouton Secondaire (avec texte) :
+
+Défaut : background-color: transparent; border: 1px solid primary-hover; color: primary-hover;
+
+Survol : background-color: primary-default; color: text-inverted; border-color: primary-default;
+
+Désactivé : background-color: background-disabled; border: 1px solid border-disabled; color: primary-disabled;
+
+Bouton Icône Seule :
+
+Utilise les mêmes règles de couleurs que le bouton primaire, mais sans texte.
+
+Autres Composants
+Checkboxes : Doivent avoir des états clairs pour selected, not selected, disabled, focused, et intermediate.​
+
+Dropdowns : Les options sélectionnées peuvent utiliser les couleurs sémantiques pour indiquer un statut.​
+
+Tags/Étiquettes : Petits conteneurs avec un fond coloré (sémantique) et du texte, utilisant un border-radius de 4px.
+
+
+

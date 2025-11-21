@@ -197,10 +197,29 @@ export class Visual implements IVisual {
         
         console.log(`📄 Page ${this.pageIndex + 1}/${totalPages} - Affichage de ${pageData.length} produits (${startIndex} à ${endIndex - 1})`);
 
+        // HEADER PRINCIPAL avec icône produit, titre et compteur
+        const mainHeader = document.createElement("div");
+        mainHeader.className = "product-table-header";
+        mainHeader.innerHTML = `
+            <div class="product-table-title">
+                <div class="product-table-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20.5 7.27777L12 12L3.5 7.27777" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 12V21.5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M11.223 2.43168C11.5066 2.27412 11.6484 2.19535 11.7986 2.16446C11.9315 2.13713 12.0685 2.13713 12.2015 2.16446C12.3516 2.19535 12.4934 2.27412 12.777 2.43168L20.177 6.54279C20.4766 6.7092 20.6263 6.7924 20.7354 6.91073C20.8318 7.01542 20.9049 7.13951 20.9495 7.27468C21 7.42748 21 7.5988 21 7.94145V16.0586C21 16.4012 21 16.5725 20.9495 16.7253C20.9049 16.8605 20.8318 16.9846 20.7354 17.0893C20.6263 17.2076 20.4766 17.2908 20.177 17.4572L12.777 21.5683C12.4934 21.7259 12.3516 21.8047 12.2015 21.8355C12.0685 21.8629 11.9315 21.8629 11.7986 21.8355C11.6484 21.8047 11.5066 21.7259 11.223 21.5683L3.82297 17.4572C3.52345 17.2908 3.37369 17.2076 3.26463 17.0893C3.16816 16.9846 3.09515 16.8605 3.05048 16.7253C3 16.5725 3 16.4012 3 16.0586V7.94145C3 7.5988 3 7.42748 3.05048 7.27468C3.09515 7.13951 3.16816 7.01543 3.26463 6.91074C3.37369 6.7924 3.52345 6.7092 3.82297 6.5428L11.223 2.43168Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h2 class="product-table-title-text">Mes produits</h2>
+            </div>
+            <div class="product-count-badge">${this.dataPoints.length}</div>
+        `;
+
+        this.target.appendChild(mainHeader);
+
         const container = document.createElement("div");
         container.className = "product-table-container";
 
-        // HEADER
+        // HEADER du tableau
         const header = document.createElement("div");
         header.className = "product-header-row";
         header.innerHTML = `
@@ -315,18 +334,22 @@ export class Visual implements IVisual {
         if (totalPages > 1) {
             const pagination = document.createElement("div");
             pagination.className = "product-pagination";
-            pagination.style.cssText = "display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; padding: 10px;";
+
+            // Info gauche
+            const paginationInfo = document.createElement("div");
+            paginationInfo.className = "product-pagination-info";
+            paginationInfo.textContent = `${startIndex + 1}-${endIndex} sur ${this.dataPoints.length} produits`;
+            pagination.appendChild(paginationInfo);
+
+            // Contrôles de navigation
+            const controls = document.createElement("div");
+            controls.className = "product-pagination-controls";
 
             // Bouton Précédent
             const prevBtn = document.createElement("button");
             prevBtn.className = "product-page-button";
             prevBtn.textContent = "◀ Précédent";
             prevBtn.disabled = this.pageIndex === 0;
-            prevBtn.style.cssText = "padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer; font-size: 12px;";
-            if (prevBtn.disabled) {
-                prevBtn.style.opacity = "0.5";
-                prevBtn.style.cursor = "not-allowed";
-            }
             prevBtn.onclick = () => {
                 if (this.pageIndex > 0) {
                     this.pageIndex--;
@@ -335,22 +358,16 @@ export class Visual implements IVisual {
                 }
             };
 
-            // Info page
+            // Info page courante
             const pageInfo = document.createElement("div");
             pageInfo.className = "product-page-info";
-            pageInfo.style.cssText = "font-size: 12px; padding: 0 15px; font-weight: 500;";
-            pageInfo.textContent = `Page ${this.pageIndex + 1} / ${totalPages} (${this.dataPoints.length} produits)`;
+            pageInfo.textContent = `Page ${this.pageIndex + 1} / ${totalPages}`;
 
             // Bouton Suivant
             const nextBtn = document.createElement("button");
             nextBtn.className = "product-page-button";
             nextBtn.textContent = "Suivant ▶";
             nextBtn.disabled = this.pageIndex >= totalPages - 1;
-            nextBtn.style.cssText = "padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer; font-size: 12px;";
-            if (nextBtn.disabled) {
-                nextBtn.style.opacity = "0.5";
-                nextBtn.style.cursor = "not-allowed";
-            }
             nextBtn.onclick = () => {
                 if (this.pageIndex < totalPages - 1) {
                     this.pageIndex++;
@@ -359,38 +376,39 @@ export class Visual implements IVisual {
                 }
             };
 
-            pagination.appendChild(prevBtn);
-            pagination.appendChild(pageInfo);
-            pagination.appendChild(nextBtn);
+            controls.appendChild(prevBtn);
+            controls.appendChild(pageInfo);
+            controls.appendChild(nextBtn);
 
+            pagination.appendChild(controls);
             container.appendChild(pagination);
         }
 
-        // Debug box
+        // Debug box (optionnel - peut être supprimé en production)
         const debugInfo = document.createElement("div");
-        debugInfo.style.cssText = "margin: 10px 0; padding: 10px; background: #e8f5e9; border: 2px solid #4caf50; font: 11px monospace;";
-        
-        const percentSelected = this.dataPoints.length > 0 
-            ? Math.round((this.selectedProductIds.size / this.dataPoints.length) * 100) 
+        debugInfo.className = "product-debug-box";
+
+        const percentSelected = this.dataPoints.length > 0
+            ? Math.round((this.selectedProductIds.size / this.dataPoints.length) * 100)
             : 0;
-        
+
         debugInfo.innerHTML = `
             <b>✅ Sélection fonctionnelle | Par ID produit</b><br>
-            Total: ${this.dataPoints.length} produits | 
+            Total: ${this.dataPoints.length} produits |
             Sélectionnés: ${this.selectedProductIds.size} (${percentSelected}%)<br>
-            ${this.selectedProductIds.size > 0 ? 
-                `IDs: [${Array.from(this.selectedProductIds).slice(0, 3).join(", ")}${this.selectedProductIds.size > 3 ? "..." : ""}]<br>` 
+            ${this.selectedProductIds.size > 0 ?
+                `IDs: [${Array.from(this.selectedProductIds).slice(0, 3).join(", ")}${this.selectedProductIds.size > 3 ? "..." : ""}]<br>`
                 : "Aucune sélection<br>"
             }
-            ${this.selectedProductIds.size > 300 ? 
-                '<span style="color: orange;">⚠️ > 300 produits sélectionnés, peut être lent</span><br>' 
+            ${this.selectedProductIds.size > 300 ?
+                '<span style="color: orange;">⚠️ > 300 produits sélectionnés, peut être lent</span><br>'
                 : ""
             }
             <b>Astuce:</b> Utilisez la checkbox en haut à droite pour tout sélectionner/désélectionner
         `;
-        container.appendChild(debugInfo);
 
         this.target.appendChild(container);
+        this.target.appendChild(debugInfo);
     }
 
     private toggleSelectAll(): void {
