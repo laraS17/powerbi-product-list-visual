@@ -13,8 +13,15 @@ import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import ISelectionId = powerbi.visuals.ISelectionId;
 
 interface ProductDataPoint {
-    name: string;
-    kpi: any;
+    id: string;
+    imageUrl: string;
+    reference: string;
+    libelle: string;
+    marque: string;
+    fournisseur: string;
+    statut: string;
+    rayon: string;
+    pvc: any;
     selectionId: ISelectionId;
 }
 
@@ -42,35 +49,73 @@ export class Visual implements IVisual {
         }
 
         const categorical = dataView.categorical;
-        const categories = categorical.categories && categorical.categories[0];
-        const values = categorical.values && categorical.values[0];
+        const category = categorical.categories && categorical.categories[0];
+        const values = categorical.values || [];
 
-        if (!categories || !values) {
+        if (!category) {
             this.target.innerHTML = "<div class='empty-state'>Aucune donnée</div>";
             this.dataPoints = [];
             return;
         }
 
-        // Construire les dataPoints avec un selectionId par ligne
-        this.dataPoints = [];
+        // Récupérer les colonnes par rôle
+        let imageCol: any = null;
+        let referenceCol: any = null;
+        let libelleCol: any = null;
+        let marqueCol: any = null;
+        let fournisseurCol: any = null;
+        let statutCol: any = null;
+        let rayonCol: any = null;
+        let pvcCol: any = null;
 
-        for (let i = 0; i < categories.values.length; i++) {
-            const name = categories.values[i];
-            const kpi = values.values[i];
+        values.forEach((col: any) => {
+            const roles = (col.source && col.source.roles) ? col.source.roles : {};
+            if (roles.imageUrl) {
+                imageCol = col;
+            } else if (roles.reference) {
+                referenceCol = col;
+            } else if (roles.libelle) {
+                libelleCol = col;
+            } else if (roles.marque) {
+                marqueCol = col;
+            } else if (roles.fournisseur) {
+                fournisseurCol = col;
+            } else if (roles.statut) {
+                statutCol = col;
+            } else if (roles.rayon) {
+                rayonCol = col;
+            } else if (roles.pvc) {
+                pvcCol = col;
+            }
+        });
+
+        this.dataPoints = [];
+        const rowCount = category.values.length;
+
+        for (let i = 0; i < rowCount; i++) {
+            const idRaw = category.values[i];
 
             const selectionId = this.host
                 .createSelectionIdBuilder()
-                .withCategory(categories, i)
+                .withCategory(category, i)
                 .createSelectionId();
 
-            this.dataPoints.push({
-                name: String(name),
-                kpi: kpi,
+            const dp: ProductDataPoint = {
+                id: idRaw !== undefined && idRaw !== null ? String(idRaw) : "",
+                imageUrl: imageCol && imageCol.values ? String(imageCol.values[i] ?? "") : "",
+                reference: referenceCol && referenceCol.values ? String(referenceCol.values[i] ?? "") : "",
+                libelle: libelleCol && libelleCol.values ? String(libelleCol.values[i] ?? "") : "",
+                marque: marqueCol && marqueCol.values ? String(marqueCol.values[i] ?? "") : "",
+                fournisseur: fournisseurCol && fournisseurCol.values ? String(fournisseurCol.values[i] ?? "") : "",
+                statut: statutCol && statutCol.values ? String(statutCol.values[i] ?? "") : "",
+                rayon: rayonCol && rayonCol.values ? String(rayonCol.values[i] ?? "") : "",
+                pvc: pvcCol && pvcCol.values ? pvcCol.values[i] : null,
                 selectionId: selectionId
-            });
+            };
+
+            this.dataPoints.push(dp);
         }
 
-        // Reconstruire le DOM proprement
         this.render();
     }
 
@@ -78,28 +123,86 @@ export class Visual implements IVisual {
         // Nettoyer le contenu
         this.target.innerHTML = "";
 
+        if (!this.dataPoints || this.dataPoints.length === 0) {
+            this.target.innerHTML = "<div class='empty-state'>Aucune donnée</div>";
+            return;
+        }
+
         const listContainer = document.createElement("div");
         listContainer.className = "product-list";
 
-        this.dataPoints.forEach((dp, index) => {
+        this.dataPoints.forEach((dp) => {
             const row = document.createElement("div");
             row.className = "product-row";
+            // on conserve l'ID en data-attribute (non affiché)
+            row.setAttribute("data-product-id", dp.id);
 
-            row.innerHTML = `
-                <div class="product-name">${dp.name}</div>
-                <div class="product-kpi">${dp.kpi}</div>
-            `;
+            // Colonne gauche : image / placeholder
+            const left = document.createElement("div");
+            left.className = "product-left";
 
-            // Gestion du clic → sélection Power BI
-            row.onclick = () => {
+            if (dp.imageUrl) {
+                const img = document.createElement("img");
+                img.className = "product-image";
+                img.src = dp.imageUrl;
+                img.alt = dp.libelle || dp.reference || "Produit";
+                left.appendChild(img);
+            } else {
+                const placeholder = document.createElement("div");
+                placeholder.className = "product-image-placeholder";
+                const initial = (dp.libelle || dp.reference || "?").toString().charAt(0).toUpperCase();
+                placeholder.textContent = initial;
+                left.appendChild(placeholder);
+            }
+
+            // Colonne centrale : libellé + meta
+            const main = document.createElement("div");
+            main.className = "product-main";
+
+            const title = document.createElement("div");
+            title.className = "product-libelle";
+            title.textContent = dp.libelle || dp.reference || "(Sans libellé)";
+            main.appendChild(title);
+
+            const meta = document.createElement("div");
+            meta.className = "product-meta";
+
+            const metaParts: string[] = [];
+            if (dp.reference) metaParts.push(`Réf. ${dp.reference}`);
+            if (dp.marque) metaParts.push(dp.marque);
+            if (dp.fournisseur) metaParts.push(dp.fournisseur);
+            if (dp.rayon) metaParts.push(dp.rayon);
+            if (dp.statut) metaParts.push(dp.statut);
+
+            meta.textContent = metaParts.join(" • ");
+            main.appendChild(meta);
+
+            // Colonne droite : PVC + bouton
+            const right = document.createElement("div");
+            right.className = "product-right";
+
+            const price = document.createElement("div");
+            price.className = "product-pvc";
+            if (dp.pvc !== null && dp.pvc !== undefined && dp.pvc !== "") {
+                price.textContent = this.formatNumber(dp.pvc) + " €";
+            }
+            right.appendChild(price);
+
+            const button = document.createElement("button");
+            button.className = "product-select-button";
+            button.type = "button";
+            button.textContent = "Sélectionner";
+            right.appendChild(button);
+
+            // Sélection (ligne + bouton)
+            const handleClick = () => {
                 this.selectionManager
-                    .select(dp.selectionId, false) // false = pas de multi-sélection
+                    .select(dp.selectionId, false)
                     .then((ids) => {
-                        // Met à jour le style visuel des lignes
                         const rows = this.target.getElementsByClassName("product-row");
                         for (let i = 0; i < rows.length; i++) {
                             const el = rows[i] as HTMLElement;
-                            if (i === index && ids.length > 0) {
+                            if (el === row && ids.length > 0) {
                                 el.classList.add("selected");
                             } else {
                                 el.classList.remove("selected");
@@ -107,15 +210,33 @@ export class Visual implements IVisual {
                         }
                     })
                     .catch((e) => {
-                        // En cas d’erreur on ignore
-                        // (on évite de casser le visuel pour un click)
                         console.error(e);
                     });
             };
+
+            row.onclick = handleClick;
+            button.onclick = (ev) => {
+                ev.stopPropagation();
+                handleClick();
+            };
+
+            row.appendChild(left);
+            row.appendChild(main);
+            row.appendChild(right);
 
             listContainer.appendChild(row);
         });
 
         this.target.appendChild(listContainer);
+    }
+
+    private formatNumber(value: any): string {
+        if (value === null || value === undefined || isNaN(Number(value))) {
+            return "";
+        }
+        return Number(value).toLocaleString("fr-FR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
     }
 }

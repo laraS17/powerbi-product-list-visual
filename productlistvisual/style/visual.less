@@ -12,32 +12,104 @@
 .product-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .product-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 6px 8px;
-  border-radius: 6px;
-  background: #f3f4f6; // gris clair
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-.product-name {
-  font-size: 12px;
-  font-weight: 500;
-  color: #111827;
-}
-
-.product-kpi {
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  color: #4b5563;
+.product-row:hover {
+  background: #f3f4f6;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
 }
 
 .product-row.selected {
-  background: #e5e7eb;
-  outline: 1px solid #4f46e5;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.35);
+  background: #eef2ff;
 }
 
+.product-left {
+  margin-right: 8px;
+}
+
+.product-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.product-image-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.product-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.product-libelle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.product-meta {
+  font-size: 11px;
+  color: #6b7280;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.product-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.product-pvc {
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.product-select-button {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: none;
+  background: #4f46e5;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.product-select-button:hover {
+  background: #4338ca;
+}

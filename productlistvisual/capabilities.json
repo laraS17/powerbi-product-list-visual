@@ -2,26 +2,68 @@
   "privileges": [],
   "dataRoles": [
     {
-      "name": "category",
+      "name": "productId",
       "kind": "Grouping",
-      "displayName": "Produit"
+      "displayName": "ID produit (caché)"
     },
     {
-      "name": "measure",
+      "name": "imageUrl",
+      "kind": "Grouping",
+      "displayName": "Image (URL)"
+    },
+    {
+      "name": "reference",
+      "kind": "Grouping",
+      "displayName": "Référence"
+    },
+    {
+      "name": "libelle",
+      "kind": "Grouping",
+      "displayName": "Libellé"
+    },
+    {
+      "name": "marque",
+      "kind": "Grouping",
+      "displayName": "Marque"
+    },
+    {
+      "name": "fournisseur",
+      "kind": "Grouping",
+      "displayName": "Fournisseur"
+    },
+    {
+      "name": "statut",
+      "kind": "Grouping",
+      "displayName": "Statut"
+    },
+    {
+      "name": "rayon",
+      "kind": "Grouping",
+      "displayName": "Rayon"
+    },
+    {
+      "name": "pvc",
       "kind": "Measure",
-      "displayName": "KPI"
+      "displayName": "PVC"
     }
   ],
   "dataViewMappings": [
     {
       "categorical": {
         "categories": {
-          "for": { "in": "category" },
+          "for": { "in": "productId" },
           "dataReductionAlgorithm": { "top": {} }
         },
         "values": {
           "select": [
-            { "for": { "in": "measure" } }
+            { "for": { "in": "imageUrl" } },
+            { "for": { "in": "reference" } },
+            { "for": { "in": "libelle" } },
+            { "for": { "in": "marque" } },
+            { "for": { "in": "fournisseur" } },
+            { "for": { "in": "statut" } },
+            { "for": { "in": "rayon" } },
+            { "for": { "in": "pvc" } }
           ]
         }
       }
