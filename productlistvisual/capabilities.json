@@ -1,73 +1,93 @@
 {
-  "privileges": [],
   "dataRoles": [
     {
+      "displayName": "ID produit",
       "name": "productId",
-      "kind": "Grouping",
-      "displayName": "ID produit (caché)"
+      "kind": "Grouping"
     },
     {
+      "displayName": "Image URL",
       "name": "imageUrl",
-      "kind": "Grouping",
-      "displayName": "Image (URL)"
+      "kind": "Grouping"
     },
     {
+      "displayName": "Référence",
       "name": "reference",
-      "kind": "Grouping",
-      "displayName": "Référence"
+      "kind": "Grouping"
     },
     {
+      "displayName": "Libellé",
       "name": "libelle",
-      "kind": "Grouping",
-      "displayName": "Libellé"
+      "kind": "Grouping"
     },
     {
+      "displayName": "Marque",
       "name": "marque",
-      "kind": "Grouping",
-      "displayName": "Marque"
+      "kind": "Grouping"
     },
     {
+      "displayName": "Fournisseur",
       "name": "fournisseur",
-      "kind": "Grouping",
-      "displayName": "Fournisseur"
+      "kind": "Grouping"
     },
     {
+      "displayName": "Statut",
       "name": "statut",
-      "kind": "Grouping",
-      "displayName": "Statut"
+      "kind": "Grouping"
     },
     {
+      "displayName": "Rayon",
       "name": "rayon",
-      "kind": "Grouping",
-      "displayName": "Rayon"
+      "kind": "Grouping"
     },
     {
+      "displayName": "PVC",
       "name": "pvc",
-      "kind": "Measure",
-      "displayName": "PVC"
+      "kind": "Measure"
     }
   ],
   "dataViewMappings": [
     {
+      "conditions": [
+        {
+          "productId": { "max": 1 },
+          "imageUrl": { "max": 1 },
+          "reference": { "max": 1 },
+          "libelle": { "max": 1 },
+          "marque": { "max": 1 },
+          "fournisseur": { "max": 1 },
+          "statut": { "max": 1 },
+          "rayon": { "max": 1 },
+          "pvc": { "max": 1 }
+        }
+      ],
       "categorical": {
         "categories": {
-          "for": { "in": "productId" },
-          "dataReductionAlgorithm": { "top": {} }
-        },
-        "values": {
           "select": [
+            { "for": { "in": "productId" } },
             { "for": { "in": "imageUrl" } },
             { "for": { "in": "reference" } },
             { "for": { "in": "libelle" } },
             { "for": { "in": "marque" } },
             { "for": { "in": "fournisseur" } },
             { "for": { "in": "statut" } },
-            { "for": { "in": "rayon" } },
+            { "for": { "in": "rayon" } }
+          ],
+          "dataReductionAlgorithm": {
+            "top": {
+              "count": 1000
+            }
+          }
+        },
+        "values": {
+          "select": [
             { "for": { "in": "pvc" } }
           ]
         }
       }
     }
   ],
-  "objects": {}
+  "objects": {},
+  "privileges": [],
+  "supportsHighlight": false
 }
