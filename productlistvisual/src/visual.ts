@@ -293,22 +293,57 @@ export class Visual implements IVisual {
             row.appendChild(cellImage);
 
             // Colonnes
-            const cells = [
-                dp.reference,
-                dp.libelle,
-                dp.marque,
-                dp.fournisseur,
-                dp.statut,
-                dp.rayon,
-                dp.pvc !== null && dp.pvc !== undefined ? this.formatNumber(dp.pvc) + "€" : ""
-            ];
+            // Référence
+            const cellRef = document.createElement("div");
+            cellRef.className = "product-cell";
+            cellRef.textContent = dp.reference;
+            row.appendChild(cellRef);
 
-            cells.forEach((text) => {
-                const cell = document.createElement("div");
-                cell.className = "product-cell";
-                cell.textContent = text;
-                row.appendChild(cell);
-            });
+            // Libellé
+            const cellLib = document.createElement("div");
+            cellLib.className = "product-cell col-libelle";
+            cellLib.textContent = dp.libelle;
+            row.appendChild(cellLib);
+
+            // Marque
+            const cellMarque = document.createElement("div");
+            cellMarque.className = "product-cell";
+            cellMarque.textContent = dp.marque;
+            row.appendChild(cellMarque);
+
+            // Fournisseur
+            const cellFourn = document.createElement("div");
+            cellFourn.className = "product-cell";
+            cellFourn.textContent = dp.fournisseur;
+            row.appendChild(cellFourn);
+
+            // Statut avec badge
+            const cellStatut = document.createElement("div");
+            cellStatut.className = "product-cell";
+            if (dp.statut) {
+                const badge = document.createElement("span");
+                badge.className = "status-badge " + this.getStatusClass(dp.statut);
+                badge.textContent = dp.statut;
+                cellStatut.appendChild(badge);
+            }
+            row.appendChild(cellStatut);
+
+            // Rayon avec badge
+            const cellRayon = document.createElement("div");
+            cellRayon.className = "product-cell";
+            if (dp.rayon) {
+                const badge = document.createElement("span");
+                badge.className = "rayon-badge";
+                badge.textContent = dp.rayon;
+                cellRayon.appendChild(badge);
+            }
+            row.appendChild(cellRayon);
+
+            // PVC
+            const cellPVC = document.createElement("div");
+            cellPVC.className = "product-cell col-pvc";
+            cellPVC.textContent = dp.pvc !== null && dp.pvc !== undefined ? this.formatNumber(dp.pvc) + "€" : "";
+            row.appendChild(cellPVC);
 
             // Checkbox
             const cellCheck = document.createElement("div");
@@ -384,31 +419,35 @@ export class Visual implements IVisual {
             container.appendChild(pagination);
         }
 
-        // Debug box (optionnel - peut être supprimé en production)
-        const debugInfo = document.createElement("div");
-        debugInfo.className = "product-debug-box";
-
-        const percentSelected = this.dataPoints.length > 0
-            ? Math.round((this.selectedProductIds.size / this.dataPoints.length) * 100)
-            : 0;
-
-        debugInfo.innerHTML = `
-            <b>✅ Sélection fonctionnelle | Par ID produit</b><br>
-            Total: ${this.dataPoints.length} produits |
-            Sélectionnés: ${this.selectedProductIds.size} (${percentSelected}%)<br>
-            ${this.selectedProductIds.size > 0 ?
-                `IDs: [${Array.from(this.selectedProductIds).slice(0, 3).join(", ")}${this.selectedProductIds.size > 3 ? "..." : ""}]<br>`
-                : "Aucune sélection<br>"
-            }
-            ${this.selectedProductIds.size > 300 ?
-                '<span style="color: orange;">⚠️ > 300 produits sélectionnés, peut être lent</span><br>'
-                : ""
-            }
-            <b>Astuce:</b> Utilisez la checkbox en haut à droite pour tout sélectionner/désélectionner
-        `;
-
         this.target.appendChild(container);
-        this.target.appendChild(debugInfo);
+    }
+
+    private getStatusClass(statut: string): string {
+        if (!statut) return "status-default";
+
+        const statutLower = statut.toLowerCase().trim();
+
+        // Mapping des statuts vers les classes CSS
+        if (statutLower.includes("valid") || statutLower.includes("activ") || statutLower.includes("publi")) {
+            return "status-valide";
+        }
+        if (statutLower.includes("actif") || statutLower.includes("en ligne")) {
+            return "status-actif";
+        }
+        if (statutLower.includes("cours") || statutLower.includes("progress") || statutLower.includes("attente")) {
+            return "status-en-cours";
+        }
+        if (statutLower.includes("brouillon") || statutLower.includes("draft") || statutLower.includes("construction")) {
+            return "status-brouillon";
+        }
+        if (statutLower.includes("refus") || statutLower.includes("reject") || statutLower.includes("archiv")) {
+            return "status-refuse";
+        }
+        if (statutLower.includes("nouveau") || statutLower.includes("new")) {
+            return "status-nouveau";
+        }
+
+        return "status-default";
     }
 
     private toggleSelectAll(): void {

@@ -16,6 +16,7 @@ export declare class Visual implements IVisual {
     constructor(options: VisualConstructorOptions);
     update(options: VisualUpdateOptions): void;
     private render;
+    private getStatusClass;
     private toggleSelectAll;
     private toggleSelection;
     private formatNumber;

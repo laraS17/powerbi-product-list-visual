@@ -210,23 +210,23 @@
 }
 
 .product-image {
-  width: @space-8;
-  height: @space-8;
+  width: @space-10; /* 48px */
+  height: @space-10; /* 48px */
   border-radius: @border-radius;
   object-fit: cover;
   border: 1px solid @neutral-200;
 }
 
 .product-image-placeholder {
-  width: @space-8;
-  height: @space-8;
+  width: @space-10; /* 48px */
+  height: @space-10; /* 48px */
   border-radius: @border-radius;
   background: @neutral-150;
   border: 1px solid @neutral-200;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: @neutral-600;
 }
@@ -326,6 +326,66 @@
   font-weight: 400;
   color: @neutral-600;
   padding: 0 @space-3;
+}
+
+/* ==========================================
+   BADGES pour Statut et Rayon
+   ========================================== */
+
+/* Badge Statut - Style avec gradient et ombre */
+.status-badge {
+  display: inline-flex;
+  padding: @space-1 @space-2;
+  border-radius: @border-radius;
+  font-size: 9px;
+  font-weight: 800; /* Extra bold */
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: @neutral-0;
+  line-height: 1.2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+}
+
+/* Variantes de badges statut basées sur le design system */
+.status-valide {
+  background: linear-gradient(135deg, #149563, #2F684C); /* Success 600 -> 700 */
+}
+
+.status-actif {
+  background: linear-gradient(135deg, #0F83B9, #006385); /* Secondary 600 -> 700 */
+}
+
+.status-en-cours {
+  background: linear-gradient(135deg, #D9822F, #B76201); /* Warning 600 -> 700 */
+}
+
+.status-brouillon {
+  background: linear-gradient(135deg, #A03EC8, #8A19AC); /* Alternative 600 -> 700 */
+}
+
+.status-refuse {
+  background: linear-gradient(135deg, #D42028, #BE1A22); /* Danger 600 -> 700 */
+}
+
+.status-nouveau {
+  background: linear-gradient(135deg, #8775FF, #613BFF); /* Primary 500 -> 600 */
+}
+
+.status-default {
+  background: linear-gradient(135deg, #666687, #4A4A6A); /* Neutral 600 -> 700 */
+}
+
+/* Badge Rayon - Style neutre */
+.rayon-badge {
+  background: @neutral-100;
+  color: @neutral-700;
+  padding: 2px @space-2;
+  border-radius: @border-radius;
+  font-size: 11px;
+  font-weight: 700; /* Bold */
+  display: inline-flex;
+  white-space: nowrap;
 }
 
 /* ==========================================
