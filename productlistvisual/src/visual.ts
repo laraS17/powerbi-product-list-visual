@@ -32,9 +32,13 @@ export class Visual implements IVisual {
     private selectionManager: ISelectionManager;
     private dataPoints: ProductDataPoint[] = [];
     
-    // CHANGEMENT CRITIQUE: utiliser les IDs produits au lieu des index !
+    // Sélection par ID produit (persiste entre les pages)
     private selectedProductIds: Set<string> = new Set();
     private updateCounter: number = 0;
+    
+    // Pagination
+    private pageIndex: number = 0;
+    private readonly pageSize: number = 20; // 20 produits par page
 
     constructor(options: VisualConstructorOptions) {
         this.target = options.element;
@@ -169,7 +173,7 @@ export class Visual implements IVisual {
     }
 
     private render(): void {
-        console.log(`🎨 RENDER: ${this.dataPoints.length} dataPoints, ${this.selectedProductIds.size} sélectionnés [${Array.from(this.selectedProductIds).join(", ")}]`);
+        console.log(`🎨 RENDER: ${this.dataPoints.length} dataPoints, ${this.selectedProductIds.size} sélectionnés [${Array.from(this.selectedProductIds).slice(0, 5).join(", ")}${this.selectedProductIds.size > 5 ? "..." : ""}]`);
 
         this.target.innerHTML = "";
 
@@ -177,6 +181,21 @@ export class Visual implements IVisual {
             this.target.innerHTML = "<div class='empty-state'>Aucune donnée</div>";
             return;
         }
+
+        // Calculer la pagination
+        const totalPages = Math.max(1, Math.ceil(this.dataPoints.length / this.pageSize));
+        if (this.pageIndex >= totalPages) {
+            this.pageIndex = totalPages - 1;
+        }
+        if (this.pageIndex < 0) {
+            this.pageIndex = 0;
+        }
+        
+        const startIndex = this.pageIndex * this.pageSize;
+        const endIndex = Math.min(startIndex + this.pageSize, this.dataPoints.length);
+        const pageData = this.dataPoints.slice(startIndex, endIndex);
+        
+        console.log(`📄 Page ${this.pageIndex + 1}/${totalPages} - Affichage de ${pageData.length} produits (${startIndex} à ${endIndex - 1})`);
 
         const container = document.createElement("div");
         container.className = "product-table-container";
@@ -193,14 +212,34 @@ export class Visual implements IVisual {
             <div class="product-header-cell">Statut</div>
             <div class="product-header-cell">Rayon</div>
             <div class="product-header-cell">PVC</div>
-            <div class="product-header-cell col-select">☑</div>
+            <div class="product-header-cell col-select"></div>
         `;
+        
+        // Ajouter le bouton "Tout sélectionner" dans la dernière cellule du header
+        const headerSelectCell = header.querySelector(".col-select");
+        if (headerSelectCell) {
+            const selectAllCheckbox = document.createElement("input");
+            selectAllCheckbox.type = "checkbox";
+            selectAllCheckbox.className = "product-select-all-checkbox";
+            selectAllCheckbox.title = "Tout sélectionner / Tout désélectionner";
+            
+            // Coché si TOUS les produits sont sélectionnés
+            const allSelected = this.dataPoints.length > 0 && 
+                                this.dataPoints.every(dp => this.selectedProductIds.has(dp.id));
+            selectAllCheckbox.checked = allSelected;
+            
+            selectAllCheckbox.onchange = (e) => {
+                e.stopPropagation();
+                this.toggleSelectAll();
+            };
+            
+            headerSelectCell.appendChild(selectAllCheckbox);
+        }
+        
         container.appendChild(header);
 
-        // LIGNES (max 20)
-        const displayData = this.dataPoints.slice(0, 20);
-        
-        displayData.forEach((dp) => {
+        // LIGNES - Affichage de la page courante
+        pageData.forEach((dp) => {
             const isSelected = this.selectedProductIds.has(dp.id);
 
             const row = document.createElement("div");
@@ -272,18 +311,146 @@ export class Visual implements IVisual {
             container.appendChild(row);
         });
 
+        // PAGINATION
+        if (totalPages > 1) {
+            const pagination = document.createElement("div");
+            pagination.className = "product-pagination";
+            pagination.style.cssText = "display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; padding: 10px;";
+
+            // Bouton Précédent
+            const prevBtn = document.createElement("button");
+            prevBtn.className = "product-page-button";
+            prevBtn.textContent = "◀ Précédent";
+            prevBtn.disabled = this.pageIndex === 0;
+            prevBtn.style.cssText = "padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer; font-size: 12px;";
+            if (prevBtn.disabled) {
+                prevBtn.style.opacity = "0.5";
+                prevBtn.style.cursor = "not-allowed";
+            }
+            prevBtn.onclick = () => {
+                if (this.pageIndex > 0) {
+                    this.pageIndex--;
+                    console.log(`📄 Page précédente: ${this.pageIndex + 1}/${totalPages}`);
+                    this.render();
+                }
+            };
+
+            // Info page
+            const pageInfo = document.createElement("div");
+            pageInfo.className = "product-page-info";
+            pageInfo.style.cssText = "font-size: 12px; padding: 0 15px; font-weight: 500;";
+            pageInfo.textContent = `Page ${this.pageIndex + 1} / ${totalPages} (${this.dataPoints.length} produits)`;
+
+            // Bouton Suivant
+            const nextBtn = document.createElement("button");
+            nextBtn.className = "product-page-button";
+            nextBtn.textContent = "Suivant ▶";
+            nextBtn.disabled = this.pageIndex >= totalPages - 1;
+            nextBtn.style.cssText = "padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer; font-size: 12px;";
+            if (nextBtn.disabled) {
+                nextBtn.style.opacity = "0.5";
+                nextBtn.style.cursor = "not-allowed";
+            }
+            nextBtn.onclick = () => {
+                if (this.pageIndex < totalPages - 1) {
+                    this.pageIndex++;
+                    console.log(`📄 Page suivante: ${this.pageIndex + 1}/${totalPages}`);
+                    this.render();
+                }
+            };
+
+            pagination.appendChild(prevBtn);
+            pagination.appendChild(pageInfo);
+            pagination.appendChild(nextBtn);
+
+            container.appendChild(pagination);
+        }
+
         // Debug box
         const debugInfo = document.createElement("div");
         debugInfo.style.cssText = "margin: 10px 0; padding: 10px; background: #e8f5e9; border: 2px solid #4caf50; font: 11px monospace;";
+        
+        const percentSelected = this.dataPoints.length > 0 
+            ? Math.round((this.selectedProductIds.size / this.dataPoints.length) * 100) 
+            : 0;
+        
         debugInfo.innerHTML = `
-            <b>✅ Affichage OK | Sélection par ID produit</b><br>
-            Total: ${this.dataPoints.length} | Sélectionnés: ${this.selectedProductIds.size} IDs<br>
-            IDs sélectionnés: [${Array.from(this.selectedProductIds).slice(0, 5).join(", ")}${this.selectedProductIds.size > 5 ? "..." : ""}]<br>
-            Updates: ${this.updateCounter}
+            <b>✅ Sélection fonctionnelle | Par ID produit</b><br>
+            Total: ${this.dataPoints.length} produits | 
+            Sélectionnés: ${this.selectedProductIds.size} (${percentSelected}%)<br>
+            ${this.selectedProductIds.size > 0 ? 
+                `IDs: [${Array.from(this.selectedProductIds).slice(0, 3).join(", ")}${this.selectedProductIds.size > 3 ? "..." : ""}]<br>` 
+                : "Aucune sélection<br>"
+            }
+            ${this.selectedProductIds.size > 300 ? 
+                '<span style="color: orange;">⚠️ > 300 produits sélectionnés, peut être lent</span><br>' 
+                : ""
+            }
+            <b>Astuce:</b> Utilisez la checkbox en haut à droite pour tout sélectionner/désélectionner
         `;
         container.appendChild(debugInfo);
 
         this.target.appendChild(container);
+    }
+
+    private toggleSelectAll(): void {
+        console.log(`\n${"★".repeat(40)}`);
+        console.log(`⭐ TOGGLE SELECT ALL`);
+        console.log(`Avant: ${this.selectedProductIds.size} produits sélectionnés`);
+        
+        // Vérifier si tout est déjà sélectionné
+        const allSelected = this.dataPoints.every(dp => this.selectedProductIds.has(dp.id));
+        
+        if (allSelected) {
+            // Tout désélectionner
+            console.log(`Action: TOUT DÉSÉLECTIONNER (${this.dataPoints.length} produits)`);
+            this.selectedProductIds.clear();
+        } else {
+            // Tout sélectionner
+            console.log(`Action: TOUT SÉLECTIONNER (${this.dataPoints.length} produits)`);
+            this.dataPoints.forEach(dp => {
+                this.selectedProductIds.add(dp.id);
+            });
+        }
+        
+        console.log(`Après: ${this.selectedProductIds.size} produits sélectionnés`);
+
+        // Construire les IDs Power BI
+        const selectedIds: ISelectionId[] = [];
+        this.dataPoints.forEach(dp => {
+            if (this.selectedProductIds.has(dp.id)) {
+                selectedIds.push(dp.selectionId);
+            }
+        });
+
+        console.log(`→ Power BI: ${selectedIds.length} IDs (sur ${this.dataPoints.length} dataPoints)`);
+        console.log(`⚠️ ATTENTION: Si > 300 produits, peut être lent !`);
+
+        if (selectedIds.length === 0) {
+            console.log("→ Appel: selectionManager.clear()");
+            this.selectionManager.clear()
+                .then(() => {
+                    console.log(`✓ Cleared`);
+                })
+                .catch(e => console.error(`✗ Error:`, e));
+        } else {
+            console.log(`→ Appel: selectionManager.clear() puis select(${selectedIds.length} IDs)`);
+            
+            this.selectionManager.clear()
+                .then(() => {
+                    console.log(`  ✓ Clear OK`);
+                    return this.selectionManager.select(selectedIds, true);
+                })
+                .then(() => {
+                    console.log(`  ✓ Select OK - ${selectedIds.length} IDs sélectionnés`);
+                })
+                .catch(e => {
+                    console.error(`  ✗ Error:`, e);
+                });
+        }
+
+        console.log(`${"★".repeat(40)}\n`);
+        this.render();
     }
 
     private toggleSelection(productId: string): void {

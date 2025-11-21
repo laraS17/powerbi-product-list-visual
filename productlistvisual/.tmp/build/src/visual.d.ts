@@ -11,9 +11,12 @@ export declare class Visual implements IVisual {
     private dataPoints;
     private selectedProductIds;
     private updateCounter;
+    private pageIndex;
+    private readonly pageSize;
     constructor(options: VisualConstructorOptions);
     update(options: VisualUpdateOptions): void;
     private render;
+    private toggleSelectAll;
     private toggleSelection;
     private formatNumber;
 }
