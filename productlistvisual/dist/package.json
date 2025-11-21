@@ -1,0 +1,17 @@
+{
+		"version": "1.0.0.0",
+		"author": {"name":"Lara Sid Ahmed","email":"l.ahmed@highco.fr"},
+		"resources": [
+			{
+				"resourceId": "rId0",
+				"sourceType": 5,
+				"file": "resources/productlistvisual5E16C2349EA7499381D5A7BA3CD5285B.pbiviz.json"
+			}
+		],
+		"visual": {"name":"productlistvisual","displayName":"productlistvisual","guid":"productlistvisual5E16C2349EA7499381D5A7BA3CD5285B","visualClassName":"Visual","version":"1.0.0.0","description":"Custom product list visual for Merely","supportUrl":"https://www.highco.com","gitHubUrl":""},
+		"metadata": {
+			"pbivizjson": {
+				"resourceId": "rId0"
+			}
+		}
+	}
