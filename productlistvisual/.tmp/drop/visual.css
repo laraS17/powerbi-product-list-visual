@@ -26,12 +26,10 @@
    HEADER avec titre, icône et compteur
    ========================================== */
 .product-table-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  background: #F6F6F9;
+  padding: 16px 20px;
   border-bottom: 1px solid #DCDCE4;
+  margin-bottom: 0;
 }
 .product-table-title {
   display: flex;
@@ -39,42 +37,44 @@
   gap: 12px;
 }
 .product-table-icon {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  /* 32px */
+  height: 32px;
+  /* 32px */
+  background: #613BFF;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 .product-table-icon svg {
-  width: 100%;
-  height: 100%;
+  width: 22px;
+  height: 22px;
   display: block;
 }
 .product-table-icon path {
-  fill: #32324D;
+  stroke: #FFFFFF;
+  fill: none;
 }
 .product-table-title-text {
   /* Header 3 du design system */
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   /* Semibold */
   line-height: 20px;
-  color: #32324D;
+  color: #1A202C;
   margin: 0;
 }
-.product-count-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  padding: 0 8px;
-  background: #613BFF;
-  color: #FFFFFF;
-  border-radius: 12px;
-  /* Small text du design system */
-  font-size: 12px;
-  font-weight: 600;
-  /* Bold */
-  line-height: 1;
+.product-count-text {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666687;
+}
+.product-count-text strong {
+  font-weight: 700;
+  color: #212134;
 }
 /* ==========================================
    TABLEAU Container
@@ -86,6 +86,11 @@
   border: 1px solid #DCDCE4;
   border-radius: 4px;
   overflow: hidden;
+}
+.product-table-scroll {
+  overflow-y: auto;
+  max-height: 600px;
+  /* Hauteur max pour le scroll */
 }
 /* ==========================================
    HEADER du tableau
@@ -111,6 +116,36 @@
   letter-spacing: 0.5px;
   color: #FFFFFF;
   white-space: nowrap;
+  cursor: default;
+}
+.product-header-cell.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.product-header-cell.sortable:hover {
+  opacity: 0.8;
+}
+.product-header-cell.sortable .sort-icon {
+  display: inline-flex;
+  flex-direction: column;
+  width: 12px;
+  height: 12px;
+  opacity: 0.4;
+}
+.product-header-cell.sortable .sort-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.product-header-cell.sortable.sort-asc .sort-icon {
+  opacity: 1;
+}
+.product-header-cell.sortable.sort-desc .sort-icon {
+  opacity: 1;
+  transform: rotate(180deg);
 }
 /* ==========================================
    LIGNES du tableau
@@ -156,27 +191,29 @@
   align-items: center;
   justify-content: center;
 }
-.product-image {
-  width: 48px;
-  /* 48px */
-  height: 48px;
-  /* 48px */
+.product-image,
+.product-image-placeholder {
+  width: 56px;
+  height: 56px;
   border-radius: 4px;
-  object-fit: cover;
   border: 1px solid #DCDCE4;
+  transition: all 0.2s ease;
+}
+.product-image {
+  object-fit: cover;
+  cursor: zoom-in;
+}
+.product-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-color: #613BFF;
 }
 .product-image-placeholder {
-  width: 48px;
-  /* 48px */
-  height: 48px;
-  /* 48px */
-  border-radius: 4px;
   background: #EAEAEF;
-  border: 1px solid #DCDCE4;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #666687;
 }
@@ -213,59 +250,114 @@
   transform: scale(1.05);
 }
 /* ==========================================
-   PAGINATION
+   PAGINATION - Design System
    ========================================== */
-.product-pagination {
+.pagination-container {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  background: #F6F6F9;
-  border-top: 1px solid #DCDCE4;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #F9FAFB;
+  border-top: 1px solid #E5E7EB;
 }
-.product-pagination-info {
-  /* Small text du design system */
-  font-size: 12px;
-  font-weight: 400;
-  color: #666687;
+.pagination-info {
+  color: #6B7280;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
-.product-pagination-controls {
+.pagination-controls {
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-content: center;
 }
-.product-page-button {
-  /* Button text du design system */
-  font-size: 14px;
-  font-weight: 600;
-  /* Bold */
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: 1px solid #613BFF;
+.pagination-btn {
   background: #FFFFFF;
-  color: #613BFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4B5563;
   cursor: pointer;
-  transition: all 0.16s ease;
+  transition: all 150ms ease;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
-.product-page-button:hover:not(:disabled) {
-  background: #613BFF;
-  color: #FFFFFF;
+.pagination-btn:hover:not(:disabled):not(.active) {
+  border-color: #613BFF;
+  color: #613BFF;
+  background: #F9FAFB;
 }
-.product-page-button:active:not(:disabled) {
+.pagination-btn:active:not(:disabled) {
   transform: translateY(1px);
 }
-.product-page-button:disabled {
-  background: #F6F6F9;
-  border-color: #C0C0CF;
-  color: #C0C0CF;
+.pagination-btn.active {
+  background: #613BFF;
+  color: #FFFFFF;
+  border-color: #613BFF;
+}
+.pagination-btn:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
 }
-.product-page-info {
-  /* Small text du design system */
-  font-size: 12px;
-  font-weight: 400;
-  color: #666687;
-  padding: 0 10px;
+.product-page-numbers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.product-page-size-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.product-page-size-label {
+  color: #6B7280;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  cursor: default;
+}
+.product-page-size-select {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  color: #4B5563;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  min-width: 50px;
+  height: 32px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 18px;
+  padding-right: 28px;
+}
+.product-page-size-select:hover {
+  border-color: #613BFF;
+  color: #613BFF;
+}
+.product-page-size-select:focus {
+  outline: none;
+  border-color: #613BFF;
+  background-color: #F9FAFB;
+}
+.product-page-size-select option {
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4B5563;
+  background: #FFFFFF;
+  padding: 4px;
 }
 /* ==========================================
    BADGES pour Statut et Rayon
@@ -325,6 +417,32 @@
   /* Bold */
   display: inline-flex;
   white-space: nowrap;
+}
+/* ==========================================
+   MODAL ZOOM IMAGE
+   ========================================== */
+.image-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+.image-modal.active {
+  display: flex;
+}
+.image-modal img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 /* ==========================================
    DEBUG BOX (optionnel)

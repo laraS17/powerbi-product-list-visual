@@ -12,7 +12,10 @@ export declare class Visual implements IVisual {
     private selectedProductIds;
     private updateCounter;
     private pageIndex;
-    private readonly pageSize;
+    private pageSize;
+    private sortColumn;
+    private sortDirection;
+    private originalDataPoints;
     constructor(options: VisualConstructorOptions);
     update(options: VisualUpdateOptions): void;
     private render;
@@ -20,4 +23,10 @@ export declare class Visual implements IVisual {
     private toggleSelectAll;
     private toggleSelection;
     private formatNumber;
+    private createSortableHeader;
+    private handleSort;
+    private applySorting;
+    private showImageZoom;
+    private renderPageNumbers;
+    private createPageButton;
 }
