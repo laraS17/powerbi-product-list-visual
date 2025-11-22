@@ -35,10 +35,15 @@ export class Visual implements IVisual {
     // Sélection par ID produit (persiste entre les pages)
     private selectedProductIds: Set<string> = new Set();
     private updateCounter: number = 0;
-    
+
     // Pagination
     private pageIndex: number = 0;
-    private readonly pageSize: number = 20; // 20 produits par page
+    private pageSize: number = 20; // 20 produits par page (modifiable)
+
+    // Tri
+    private sortColumn: string | null = null; // 'reference', 'libelle', 'marque', 'pvc'
+    private sortDirection: 'asc' | 'desc' | null = null;
+    private originalDataPoints: ProductDataPoint[] = []; // Ordre initial
 
     constructor(options: VisualConstructorOptions) {
         this.target = options.element;
@@ -169,6 +174,14 @@ export class Visual implements IVisual {
         console.log(`💾 IDs sélectionnés conservés: [${Array.from(this.selectedProductIds).join(", ")}]`);
         console.log(`${"=".repeat(80)}\n`);
 
+        // Sauvegarder l'ordre original
+        this.originalDataPoints = [...this.dataPoints];
+
+        // Appliquer le tri si actif
+        if (this.sortColumn && this.sortDirection) {
+            this.applySorting();
+        }
+
         this.render();
     }
 
@@ -197,65 +210,92 @@ export class Visual implements IVisual {
         
         console.log(`📄 Page ${this.pageIndex + 1}/${totalPages} - Affichage de ${pageData.length} produits (${startIndex} à ${endIndex - 1})`);
 
-        // HEADER PRINCIPAL avec icône produit, titre et compteur
+        // HEADER PRINCIPAL avec icône produit, titre et compteur élégant
         const mainHeader = document.createElement("div");
         mainHeader.className = "product-table-header";
-        mainHeader.innerHTML = `
-            <div class="product-table-title">
-                <div class="product-table-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20.5 7.27777L12 12L3.5 7.27777" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 12V21.5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M11.223 2.43168C11.5066 2.27412 11.6484 2.19535 11.7986 2.16446C11.9315 2.13713 12.0685 2.13713 12.2015 2.16446C12.3516 2.19535 12.4934 2.27412 12.777 2.43168L20.177 6.54279C20.4766 6.7092 20.6263 6.7924 20.7354 6.91073C20.8318 7.01542 20.9049 7.13951 20.9495 7.27468C21 7.42748 21 7.5988 21 7.94145V16.0586C21 16.4012 21 16.5725 20.9495 16.7253C20.9049 16.8605 20.8318 16.9846 20.7354 17.0893C20.6263 17.2076 20.4766 17.2908 20.177 17.4572L12.777 21.5683C12.4934 21.7259 12.3516 21.8047 12.2015 21.8355C12.0685 21.8629 11.9315 21.8629 11.7986 21.8355C11.6484 21.8047 11.5066 21.7259 11.223 21.5683L3.82297 17.4572C3.52345 17.2908 3.37369 17.2076 3.26463 17.0893C3.16816 16.9846 3.09515 16.8605 3.05048 16.7253C3 16.5725 3 16.4012 3 16.0586V7.94145C3 7.5988 3 7.42748 3.05048 7.27468C3.09515 7.13951 3.16816 7.01543 3.26463 6.91074C3.37369 6.7924 3.52345 6.7092 3.82297 6.5428L11.223 2.43168Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h2 class="product-table-title-text">Mes produits</h2>
+
+        const titleDiv = document.createElement("div");
+        titleDiv.className = "product-table-title";
+        const selectedCountText = this.selectedProductIds.size > 0
+            ? ` | <strong style="color: #613BFF">${this.selectedProductIds.size}</strong> sélectionné${this.selectedProductIds.size > 1 ? 's' : ''}`
+            : '';
+
+        titleDiv.innerHTML = `
+            <div class="product-table-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20.5 7.27777L12 12L3.5 7.27777" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 12V21.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M11.223 2.43168C11.5066 2.27412 11.6484 2.19535 11.7986 2.16446C11.9315 2.13713 12.0685 2.13713 12.2015 2.16446C12.3516 2.19535 12.4934 2.27412 12.777 2.43168L20.177 6.54279C20.4766 6.7092 20.6263 6.7924 20.7354 6.91073C20.8318 7.01542 20.9049 7.13951 20.9495 7.27468C21 7.42748 21 7.5988 21 7.94145V16.0586C21 16.4012 21 16.5725 20.9495 16.7253C20.9049 16.8605 20.8318 16.9846 20.7354 17.0893C20.6263 17.2076 20.4766 17.2908 20.177 17.4572L12.777 21.5683C12.4934 21.7259 12.3516 21.8047 12.2015 21.8355C12.0685 21.8629 11.9315 21.8629 11.7986 21.8355C11.6484 21.8047 11.5066 21.7259 11.223 21.5683L3.82297 17.4572C3.52345 17.2908 3.37369 17.2076 3.26463 17.0893C3.16816 16.9846 3.09515 16.8605 3.05048 16.7253C3 16.5725 3 16.4012 3 16.0586V7.94145C3 7.5988 3 7.42748 3.05048 7.27468C3.09515 7.13951 3.16816 7.01543 3.26463 6.91074C3.37369 6.7924 3.52345 6.7092 3.82297 6.5428L11.223 2.43168Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
             </div>
-            <div class="product-count-badge">${this.dataPoints.length}</div>
+            <h2 class="product-table-title-text">Mes produits</h2>
+            <div class="product-count-text"><strong>${this.dataPoints.length}</strong> produits${selectedCountText}</div>
         `;
 
+        mainHeader.appendChild(titleDiv);
         this.target.appendChild(mainHeader);
 
         const container = document.createElement("div");
         container.className = "product-table-container";
 
-        // HEADER du tableau
+        // HEADER du tableau avec colonnes triables
         const header = document.createElement("div");
         header.className = "product-header-row";
-        header.innerHTML = `
-            <div class="product-header-cell col-image">Img</div>
-            <div class="product-header-cell">Réf.</div>
-            <div class="product-header-cell">Libellé</div>
-            <div class="product-header-cell">Marque</div>
-            <div class="product-header-cell">Fournisseur</div>
-            <div class="product-header-cell">Statut</div>
-            <div class="product-header-cell">Rayon</div>
-            <div class="product-header-cell">PVC</div>
-            <div class="product-header-cell col-select"></div>
-        `;
-        
-        // Ajouter le bouton "Tout sélectionner" dans la dernière cellule du header
-        const headerSelectCell = header.querySelector(".col-select");
-        if (headerSelectCell) {
-            const selectAllCheckbox = document.createElement("input");
-            selectAllCheckbox.type = "checkbox";
-            selectAllCheckbox.className = "product-select-all-checkbox";
-            selectAllCheckbox.title = "Tout sélectionner / Tout désélectionner";
-            
-            // Coché si TOUS les produits sont sélectionnés
-            const allSelected = this.dataPoints.length > 0 && 
-                                this.dataPoints.every(dp => this.selectedProductIds.has(dp.id));
-            selectAllCheckbox.checked = allSelected;
-            
-            selectAllCheckbox.onchange = (e) => {
-                e.stopPropagation();
-                this.toggleSelectAll();
-            };
-            
-            headerSelectCell.appendChild(selectAllCheckbox);
-        }
-        
+
+        // Colonnes non triables
+        const imgHeader = document.createElement("div");
+        imgHeader.className = "product-header-cell col-image";
+        imgHeader.textContent = "Img";
+        header.appendChild(imgHeader);
+
+        // Colonnes triables
+        this.createSortableHeader(header, "Réf.", "reference");
+        this.createSortableHeader(header, "Libellé", "libelle");
+        this.createSortableHeader(header, "Marque", "marque");
+
+        // Fournisseur non triable
+        const fournHeader = document.createElement("div");
+        fournHeader.className = "product-header-cell";
+        fournHeader.textContent = "Fournisseur";
+        header.appendChild(fournHeader);
+
+        // Statut non triable
+        const statutHeader = document.createElement("div");
+        statutHeader.className = "product-header-cell";
+        statutHeader.textContent = "Statut";
+        header.appendChild(statutHeader);
+
+        // Rayon non triable
+        const rayonHeader = document.createElement("div");
+        rayonHeader.className = "product-header-cell";
+        rayonHeader.textContent = "Rayon";
+        header.appendChild(rayonHeader);
+
+        // PVC triable
+        this.createSortableHeader(header, "PVC", "pvc");
+
+        // Checkbox tout sélectionner
+        const headerSelectCell = document.createElement("div");
+        headerSelectCell.className = "product-header-cell col-select";
+        const selectAllCheckbox = document.createElement("input");
+        selectAllCheckbox.type = "checkbox";
+        selectAllCheckbox.className = "product-select-all-checkbox";
+        selectAllCheckbox.title = "Tout sélectionner / Tout désélectionner";
+        const allSelected = this.dataPoints.length > 0 &&
+                            this.dataPoints.every(dp => this.selectedProductIds.has(dp.id));
+        selectAllCheckbox.checked = allSelected;
+        selectAllCheckbox.onchange = (e) => {
+            e.stopPropagation();
+            this.toggleSelectAll();
+        };
+        headerSelectCell.appendChild(selectAllCheckbox);
+        header.appendChild(headerSelectCell);
+
         container.appendChild(header);
+
+        // Scroll wrapper pour les lignes
+        const scrollWrapper = document.createElement("div");
+        scrollWrapper.className = "product-table-scroll";
 
         // LIGNES - Affichage de la page courante
         pageData.forEach((dp) => {
@@ -276,6 +316,10 @@ export class Visual implements IVisual {
                 img.className = "product-image";
                 img.src = dp.imageUrl;
                 img.alt = dp.libelle || dp.reference;
+                img.onclick = (e) => {
+                    e.stopPropagation();
+                    this.showImageZoom(dp.imageUrl);
+                };
                 img.onerror = () => {
                     img.style.display = "none";
                     const placeholder = document.createElement("div");
@@ -362,62 +406,97 @@ export class Visual implements IVisual {
             cellCheck.appendChild(checkbox);
             row.appendChild(cellCheck);
 
-            container.appendChild(row);
+            scrollWrapper.appendChild(row);
         });
 
-        // PAGINATION
-        if (totalPages > 1) {
-            const pagination = document.createElement("div");
-            pagination.className = "product-pagination";
+        container.appendChild(scrollWrapper);
 
-            // Info gauche
-            const paginationInfo = document.createElement("div");
-            paginationInfo.className = "product-pagination-info";
-            paginationInfo.textContent = `${startIndex + 1}-${endIndex} sur ${this.dataPoints.length} produits`;
-            pagination.appendChild(paginationInfo);
+        // PAGINATION - Toujours afficher
+        const pagination = document.createElement("div");
+        pagination.className = "pagination-container";
 
-            // Contrôles de navigation
-            const controls = document.createElement("div");
-            controls.className = "product-pagination-controls";
+        // Info gauche avec numéro d'articles
+        const paginationInfo = document.createElement("div");
+        paginationInfo.className = "pagination-info";
+        paginationInfo.textContent = `${startIndex + 1} - ${endIndex} sur ${this.dataPoints.length} produit${this.dataPoints.length > 1 ? 's' : ''}`;
+        pagination.appendChild(paginationInfo);
 
-            // Bouton Précédent
-            const prevBtn = document.createElement("button");
-            prevBtn.className = "product-page-button";
-            prevBtn.textContent = "◀ Précédent";
-            prevBtn.disabled = this.pageIndex === 0;
-            prevBtn.onclick = () => {
-                if (this.pageIndex > 0) {
-                    this.pageIndex--;
-                    console.log(`📄 Page précédente: ${this.pageIndex + 1}/${totalPages}`);
-                    this.render();
-                }
-            };
+        // Contrôles de navigation
+        const controls = document.createElement("div");
+        controls.className = "pagination-controls";
 
-            // Info page courante
-            const pageInfo = document.createElement("div");
-            pageInfo.className = "product-page-info";
-            pageInfo.textContent = `Page ${this.pageIndex + 1} / ${totalPages}`;
+        // Bouton Précédent
+        const prevBtn = document.createElement("button");
+        prevBtn.className = "pagination-btn";
+        prevBtn.textContent = "← Précédent";
+        prevBtn.disabled = this.pageIndex === 0;
+        prevBtn.onclick = () => {
+            if (this.pageIndex > 0) {
+                this.pageIndex--;
+                console.log(`📄 Page précédente: ${this.pageIndex + 1}/${totalPages}`);
+                this.render();
+            }
+        };
+        controls.appendChild(prevBtn);
 
-            // Bouton Suivant
-            const nextBtn = document.createElement("button");
-            nextBtn.className = "product-page-button";
-            nextBtn.textContent = "Suivant ▶";
-            nextBtn.disabled = this.pageIndex >= totalPages - 1;
-            nextBtn.onclick = () => {
-                if (this.pageIndex < totalPages - 1) {
-                    this.pageIndex++;
-                    console.log(`📄 Page suivante: ${this.pageIndex + 1}/${totalPages}`);
-                    this.render();
-                }
-            };
+        // Numéros de page
+        const pageNumbersDiv = document.createElement("div");
+        pageNumbersDiv.className = "product-page-numbers";
+        this.renderPageNumbers(pageNumbersDiv, totalPages);
+        controls.appendChild(pageNumbersDiv);
 
-            controls.appendChild(prevBtn);
-            controls.appendChild(pageInfo);
-            controls.appendChild(nextBtn);
+        // Bouton Suivant
+        const nextBtn = document.createElement("button");
+        nextBtn.className = "pagination-btn";
+        nextBtn.textContent = "Suivant →";
+        nextBtn.disabled = this.pageIndex >= totalPages - 1;
+        nextBtn.onclick = () => {
+            if (this.pageIndex < totalPages - 1) {
+                this.pageIndex++;
+                console.log(`📄 Page suivante: ${this.pageIndex + 1}/${totalPages}`);
+                this.render();
+            }
+        };
+        controls.appendChild(nextBtn);
 
-            pagination.appendChild(controls);
-            container.appendChild(pagination);
-        }
+        pagination.appendChild(controls);
+
+        // Sélecteur de taille de page (bas de la pagination)
+        const pageSizeContainer = document.createElement("div");
+        pageSizeContainer.className = "product-page-size-container";
+
+        const pageSizeLabel = document.createElement("label");
+        pageSizeLabel.className = "product-page-size-label";
+        pageSizeLabel.textContent = "Afficher ";
+
+        const pageSizeSelect = document.createElement("select");
+        pageSizeSelect.className = "product-page-size-select";
+        [10, 20, 50, 100].forEach(size => {
+            const option = document.createElement("option");
+            option.value = String(size);
+            option.textContent = String(size);
+            if (size === this.pageSize) {
+                option.selected = true;
+            }
+            pageSizeSelect.appendChild(option);
+        });
+        pageSizeSelect.onchange = () => {
+            this.pageSize = parseInt(pageSizeSelect.value);
+            this.pageIndex = 0;
+            console.log(`📏 Nouvelle taille de page: ${this.pageSize}`);
+            this.render();
+        };
+
+        const pageSizeLabel2 = document.createElement("label");
+        pageSizeLabel2.className = "product-page-size-label";
+        pageSizeLabel2.textContent = " produits par page";
+
+        pageSizeContainer.appendChild(pageSizeLabel);
+        pageSizeContainer.appendChild(pageSizeSelect);
+        pageSizeContainer.appendChild(pageSizeLabel2);
+        pagination.appendChild(pageSizeContainer);
+
+        container.appendChild(pagination);
 
         this.target.appendChild(container);
     }
@@ -574,5 +653,190 @@ export class Visual implements IVisual {
     private formatNumber(value: any): string {
         if (value === null || value === undefined || isNaN(Number(value))) return "";
         return Number(value).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    private createSortableHeader(parent: HTMLElement, label: string, column: string): void {
+        const headerCell = document.createElement("div");
+        headerCell.className = "product-header-cell sortable";
+
+        if (this.sortColumn === column) {
+            headerCell.classList.add(this.sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+        }
+
+        const labelSpan = document.createElement("span");
+        labelSpan.textContent = label;
+        headerCell.appendChild(labelSpan);
+
+        const iconSpan = document.createElement("span");
+        iconSpan.className = "sort-icon";
+        iconSpan.innerHTML = `
+            <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 2L9 6H3L6 2Z" fill="white"/>
+            </svg>
+        `;
+        headerCell.appendChild(iconSpan);
+
+        headerCell.onclick = () => this.handleSort(column);
+        parent.appendChild(headerCell);
+    }
+
+    private handleSort(column: string): void {
+        console.log(`🔄 Tri sur colonne: ${column}`);
+
+        if (this.sortColumn === column) {
+            // Cycle: asc -> desc -> null
+            if (this.sortDirection === 'asc') {
+                this.sortDirection = 'desc';
+            } else if (this.sortDirection === 'desc') {
+                this.sortColumn = null;
+                this.sortDirection = null;
+                this.dataPoints = [...this.originalDataPoints];
+                this.render();
+                return;
+            }
+        } else {
+            this.sortColumn = column;
+            this.sortDirection = 'asc';
+        }
+
+        this.applySorting();
+        this.pageIndex = 0; // Retour à la première page
+        this.render();
+    }
+
+    private applySorting(): void {
+        if (!this.sortColumn || !this.sortDirection) return;
+
+        this.dataPoints.sort((a, b) => {
+            let valA: any;
+            let valB: any;
+
+            switch (this.sortColumn) {
+                case 'reference':
+                    valA = a.reference || '';
+                    valB = b.reference || '';
+                    break;
+                case 'libelle':
+                    valA = a.libelle || '';
+                    valB = b.libelle || '';
+                    break;
+                case 'marque':
+                    valA = a.marque || '';
+                    valB = b.marque || '';
+                    break;
+                case 'pvc':
+                    valA = a.pvc || 0;
+                    valB = b.pvc || 0;
+                    break;
+                default:
+                    return 0;
+            }
+
+            // Comparaison
+            let comparison = 0;
+            if (typeof valA === 'string' && typeof valB === 'string') {
+                comparison = valA.localeCompare(valB, 'fr');
+            } else {
+                comparison = valA < valB ? -1 : valA > valB ? 1 : 0;
+            }
+
+            return this.sortDirection === 'asc' ? comparison : -comparison;
+        });
+    }
+
+    private showImageZoom(imageUrl: string): void {
+        // Créer le modal s'il n'existe pas
+        let modal = document.querySelector('.image-modal') as HTMLElement;
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.className = 'image-modal';
+            const img = document.createElement('img');
+            modal.appendChild(img);
+            document.body.appendChild(modal);
+
+            modal.onclick = () => {
+                modal.classList.remove('active');
+            };
+        }
+
+        const img = modal.querySelector('img');
+        if (img) {
+            img.src = imageUrl;
+            modal.classList.add('active');
+        }
+    }
+
+    private renderPageNumbers(container: HTMLElement, totalPages: number): void {
+        // Logique pour afficher les numéros de page avec ellipses si nécessaire
+        const maxButtons = 7; // Maximum de boutons à afficher
+        const currentPage = this.pageIndex;
+
+        let startPage = 0;
+        let endPage = totalPages - 1;
+
+        if (totalPages <= maxButtons) {
+            // Afficher toutes les pages
+            startPage = 0;
+            endPage = totalPages - 1;
+        } else {
+            // Afficher avec ellipses
+            const halfButtons = Math.floor((maxButtons - 3) / 2); // -3 pour première, dernière et ellipses
+
+            if (currentPage <= halfButtons + 1) {
+                // Proche du début
+                startPage = 0;
+                endPage = maxButtons - 3;
+            } else if (currentPage >= totalPages - halfButtons - 2) {
+                // Proche de la fin
+                startPage = totalPages - (maxButtons - 2);
+                endPage = totalPages - 1;
+            } else {
+                // Au milieu
+                startPage = currentPage - halfButtons;
+                endPage = currentPage + halfButtons;
+            }
+        }
+
+        // Première page (toujours afficher si on commence pas à 0)
+        if (startPage > 0) {
+            this.createPageButton(container, 0);
+            if (startPage > 1) {
+                const ellipsis = document.createElement("span");
+                ellipsis.className = "product-page-ellipsis";
+                ellipsis.textContent = "...";
+                container.appendChild(ellipsis);
+            }
+        }
+
+        // Pages du milieu
+        for (let i = startPage; i <= endPage; i++) {
+            this.createPageButton(container, i);
+        }
+
+        // Dernière page (toujours afficher si on finit pas à la fin)
+        if (endPage < totalPages - 1) {
+            if (endPage < totalPages - 2) {
+                const ellipsis = document.createElement("span");
+                ellipsis.className = "product-page-ellipsis";
+                ellipsis.textContent = "...";
+                container.appendChild(ellipsis);
+            }
+            this.createPageButton(container, totalPages - 1);
+        }
+    }
+
+    private createPageButton(container: HTMLElement, pageIndex: number): void {
+        const pageBtn = document.createElement("button");
+        pageBtn.className = "pagination-btn";
+        if (pageIndex === this.pageIndex) {
+            pageBtn.classList.add("active");
+        }
+        pageBtn.textContent = String(pageIndex + 1);
+        pageBtn.onclick = () => {
+            this.pageIndex = pageIndex;
+            console.log(`📄 Navigation vers page ${pageIndex + 1}`);
+            this.render();
+        };
+        container.appendChild(pageBtn);
     }
 }
